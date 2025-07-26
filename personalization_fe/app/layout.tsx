@@ -22,10 +22,10 @@ const staticSettings = {
   defaultTheme: "system" as const,
   forcedTheme: null,
   background: {
-    color1: { hex: "#ff6b6b" },
-    color2: { hex: "#4ecdc4" },
-    color3: { hex: "#45b7d1" },
-    color4: { hex: "#f9ca24" },
+    color1: { hex: "#e6f3ff" },
+    color2: { hex: "#cce7ff" },
+    color3: { hex: "#a6d5ff" },
+    color4: { hex: "#80c4ff" },
     speed: 1.5,
   },
 };
