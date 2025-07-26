@@ -5,7 +5,6 @@ import clsx from "clsx";
 const staticNavigation = {
   items: [
     { href: "/", _title: "Home" },
-    { href: "/form", _title: "Form" },
   ],
 };
 
