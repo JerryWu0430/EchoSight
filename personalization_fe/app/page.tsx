@@ -1,74 +1,443 @@
-import { InputForm } from "@/components/waitlist-form"
-import { WaitlistWrapper } from "@/components/box"
-import type { Metadata } from "next"
+"use client"
+import { WaitlistWrapper } from "@/components/box";
+import { useState } from "react";
+import { Play } from "lucide-react";
 
-export const dynamic = "force-static"
-
-export const metadata: Metadata = {
-  title: "EarEye - Personalized AI Assistant",
-  description: "Join the waitlist for EarEye, the next generation of personalized AI assistance.",
-  openGraph: {
-    type: "website",
-    title: "EarEye - Personalized AI Assistant",
-    description: "Join the waitlist for EarEye, the next generation of personalized AI assistance.",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "EarEye - Personalized AI Assistant",
-    description: "Join the waitlist for EarEye, the next generation of personalized AI assistance.",
-  },
-}
+const soundOptions = [
+  "Tone Sound",
+  "Chime Sound", 
+  "Click Sound",
+  "Beep Sound",
+  "Musical Sound",
+  "Nature Sound",
+  "Voice Alert",
+  "Harmonic Sound"
+];
 
 export default function Home() {
-  const waitlistData = {
-    title: "EarEye: The Future of Personalized AI",
-    subtitle: "Experience AI that truly understands you. Join our waitlist to be among the first to access revolutionary personalized AI assistance.",
-    emailPlaceholder: "Enter your email address",
-    buttonCopy: {
-      idle: "Join Waitlist",
-      success: "Welcome aboard!",
-      loading: "Joining..."
-    }
-  }
+  const [activeTab, setActiveTab] = useState<"sound" | "objects">("sound");
+  const [volume, setVolume] = useState(75);
+  const [frequency, setFrequency] = useState(50);
+  const [objectSounds, setObjectSounds] = useState({
+    cars: "Tone Sound",
+    people: "Chime Sound", 
+    static: "Click Sound"
+  });
 
-  const handleFormSubmission = async (data: FormData) => {
-    "use server"
-    // Simulate form submission
-    const email = data.get("email") as string
-    if (!email || !email.includes("@")) {
-      return {
-        success: false as const,
-        error: "Please enter a valid email address"
-      }
-    }
+  const playPreview = (soundType: string, category: string) => {
+    console.log(`Playing preview for ${category}: ${soundType}`);
+    // Here you would implement actual audio playback
     
-    // Here you could integrate with any email service or database
-    console.log("Waitlist signup:", email)
-    return { success: true as const }
-  }
+    // Simple Web Audio API demo
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    const frequencies: { [key: string]: number } = {
+      "Tone Sound": 440,
+      "Chime Sound": 800,
+      "Click Sound": 1200,
+      "Beep Sound": 500,
+      "Musical Sound": 523,
+      "Nature Sound": 200,
+      "Voice Alert": 300,
+      "Harmonic Sound": 660
+    };
+    
+    oscillator.frequency.setValueAtTime(frequencies[soundType] || 440, audioContext.currentTime);
+    gainNode.gain.setValueAtTime(volume / 100 * 0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+  };
 
   return (
-    <WaitlistWrapper>
-      {/* Heading */}
-      <div className="space-y-1">
-        <h1 className="text-2xl sm:text-3xl font-medium text-slate-12 whitespace-pre-wrap text-pretty">
-          {waitlistData.title}
-        </h1>
-        <div className="text-slate-10 [&>p]:tracking-tight text-pretty">
-          <p>{waitlistData.subtitle}</p>
+    <div className="w-full max-w-7xl mx-auto">
+      {/* Main Layout with Side Containers */}
+      <div className="flex gap-6">
+        {/* Left Side Containers */}
+        <div className="flex flex-col gap-6 w-64 flex-shrink-0">
+          {/* Top Left Container */}
+          <div className="bg-gray-1/85 rounded-2xl p-6 shadow-[0px_170px_48px_0px_rgba(18,_18,_19,_0.00),_0px_109px_44px_0px_rgba(18,_18,_19,_0.01),_0px_61px_37px_0px_rgba(18,_18,_19,_0.05),_0px_27px_27px_0px_rgba(18,_18,_19,_0.09),_0px_7px_15px_0px_rgba(18,_18,_19,_0.10)]">
+            <div className="space-y-4">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-slate-12 mb-2">Quick Stats</h3>
+                <p className="text-slate-10 text-sm">Your audio feedback summary</p>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-11">Volume Level</span>
+                    <span className="text-sm font-medium text-slate-12">{volume}%</span>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-11">Frequency</span>
+                    <span className="text-sm font-medium text-slate-12">{frequency}%</span>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-11">Active Sounds</span>
+                    <span className="text-sm font-medium text-slate-12">3</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Bottom Left Container */}
+          <div className="bg-gray-1/85 rounded-2xl p-6 shadow-[0px_170px_48px_0px_rgba(18,_18,_19,_0.00),_0px_109px_44px_0px_rgba(18,_18,_19,_0.01),_0px_61px_37px_0px_rgba(18,_18,_19,_0.05),_0px_27px_27px_0px_rgba(18,_18,_19,_0.09),_0px_7px_15px_0px_rgba(18,_18,_19,_0.10)]">
+            <div className="space-y-4">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-slate-12 mb-2">Recent Activity</h3>
+                <p className="text-slate-10 text-sm">Latest audio feedback events</p>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">🚗</span>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-slate-12">Vehicle detected</div>
+                      <div className="text-xs text-slate-10">2 minutes ago</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">👥</span>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-slate-12">Person nearby</div>
+                      <div className="text-xs text-slate-10">5 minutes ago</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">📦</span>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-slate-12">Obstacle ahead</div>
+                      <div className="text-xs text-slate-10">8 minutes ago</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1">
+          <WaitlistWrapper>
+            <div className="w-full space-y-8">
+              {/* Header */}
+              <div className="text-center space-y-2">
+                <h1 className="text-2xl sm:text-3xl font-bold text-slate-12">
+                  Audio Navigation Assistant
+                </h1>
+                <p className="text-slate-10 text-sm">
+                  Personalize your wearable device audio feedback
+                </p>
+              </div>
+
+              {/* Audio Preferences Section */}
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-12 mb-2">Audio Preferences</h2>
+                  <p className="text-slate-10 text-sm">
+                    Customize your audio feedback settings for different object types and situations.
+                  </p>
+                </div>
+
+                {/* Tabs */}
+                <div className="flex space-x-1 bg-gray-6 p-1 rounded-lg">
+                  <button
+                    onClick={() => setActiveTab("sound")}
+                    className={`flex-1 flex items-center justify-center py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                      activeTab === "sound"
+                        ? "bg-blue-100 text-blue-700 shadow-sm"
+                        : "text-slate-10 hover:text-slate-12"
+                    }`}
+                  >
+                    🔊 Sound Settings
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("objects")}
+                    className={`flex-1 flex items-center justify-center py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                      activeTab === "objects"
+                        ? "bg-blue-100 text-blue-700 shadow-sm"
+                        : "text-slate-10 hover:text-slate-12"
+                    }`}
+                  >
+                    ⚙️ Object Categories
+                  </button>
+                </div>
+
+                {/* Sound Settings Tab */}
+                {activeTab === "sound" && (
+                  <div className="space-y-8">
+                    {/* Audio Controls */}
+                    <div className="space-y-6">
+                      <h3 className="text-lg font-semibold text-slate-12">Audio Controls</h3>
+                      <p className="text-slate-10 text-sm">Adjust volume and feedback frequency</p>
+                      
+                      {/* Volume Control */}
+                      <div className="space-y-3">
+                        <label className="block text-sm font-medium text-slate-11">
+                          Volume: {volume}%
+                        </label>
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          step="5"
+                          value={volume}
+                          onChange={(e) => setVolume(parseInt(e.target.value))}
+                          className="w-full h-2 bg-gray-6 rounded-lg appearance-none cursor-pointer slider"
+                        />
+                      </div>
+
+                      {/* Frequency Control */}
+                      <div className="space-y-3">
+                        <label className="block text-sm font-medium text-slate-11">
+                          Feedback Frequency: {frequency}%
+                        </label>
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          step="5"
+                          value={frequency}
+                          onChange={(e) => setFrequency(parseInt(e.target.value))}
+                          className="w-full h-2 bg-gray-6 rounded-lg appearance-none cursor-pointer slider"
+                        />
+                        <p className="text-xs text-slate-9">
+                          Higher frequency means more frequent audio updates
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Object Categories Tab */}
+                {activeTab === "objects" && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Cars & Vehicles */}
+                    <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 space-y-4">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xl">🚗</span>
+                        <h3 className="font-semibold text-slate-12">Cars & Vehicles</h3>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <label className="block text-sm font-medium text-slate-11">
+                          Select Sound
+                        </label>
+                        <select
+                          value={objectSounds.cars}
+                          onChange={(e) => setObjectSounds({...objectSounds, cars: e.target.value})}
+                          className="w-full px-3 py-2 bg-white border border-gray-6 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          {soundOptions.map(option => (
+                            <option key={option} value={option}>{option}</option>
+                          ))}
+                        </select>
+                        
+                        <button
+                          onClick={() => playPreview(objectSounds.cars, "cars")}
+                          className="w-full flex items-center justify-center space-x-2 py-2 px-4 border border-gray-6 rounded-md text-sm font-medium text-slate-11 hover:bg-gray-3 transition-colors"
+                        >
+                          <Play className="w-4 h-4" />
+                          <span>Preview</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* People & Animals */}
+                    <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 space-y-4">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xl">👥</span>
+                        <h3 className="font-semibold text-slate-12">People & Animals</h3>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <label className="block text-sm font-medium text-slate-11">
+                          Select Sound
+                        </label>
+                        <select
+                          value={objectSounds.people}
+                          onChange={(e) => setObjectSounds({...objectSounds, people: e.target.value})}
+                          className="w-full px-3 py-2 bg-white border border-gray-6 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          {soundOptions.map(option => (
+                            <option key={option} value={option}>{option}</option>
+                          ))}
+                        </select>
+                        
+                        <button
+                          onClick={() => playPreview(objectSounds.people, "people")}
+                          className="w-full flex items-center justify-center space-x-2 py-2 px-4 border border-gray-6 rounded-md text-sm font-medium text-slate-11 hover:bg-gray-3 transition-colors"
+                        >
+                          <Play className="w-4 h-4" />
+                          <span>Preview</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Static Objects */}
+                    <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 space-y-4">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xl">📦</span>
+                        <h3 className="font-semibold text-slate-12">Static Objects</h3>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <label className="block text-sm font-medium text-slate-11">
+                          Select Sound
+                        </label>
+                        <select
+                          value={objectSounds.static}
+                          onChange={(e) => setObjectSounds({...objectSounds, static: e.target.value})}
+                          className="w-full px-3 py-2 bg-white border border-gray-6 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          {soundOptions.map(option => (
+                            <option key={option} value={option}>{option}</option>
+                          ))}
+                        </select>
+                        
+                        <button
+                          onClick={() => playPreview(objectSounds.static, "static")}
+                          className="w-full flex items-center justify-center space-x-2 py-2 px-4 border border-gray-6 rounded-md text-sm font-medium text-slate-11 hover:bg-gray-3 transition-colors"
+                        >
+                          <Play className="w-4 h-4" />
+                          <span>Preview</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Save Settings Button */}
+              <div className="pt-4">
+                <button
+                  onClick={() => {
+                    console.log("Saving settings:", { volume, frequency, objectSounds });
+                    alert("Settings saved successfully!");
+                  }}
+                  className="w-full bg-slate-12 text-slate-1 py-3 px-6 rounded-lg font-medium hover:bg-slate-11 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-8"
+                >
+                  Save Settings
+                </button>
+              </div>
+            </div>
+          </WaitlistWrapper>
+        </div>
+
+        {/* Right Side Container */}
+        <div className="w-64 flex-shrink-0">
+          <div className="bg-gray-1/85 rounded-2xl p-6 shadow-[0px_170px_48px_0px_rgba(18,_18,_19,_0.00),_0px_109px_44px_0px_rgba(18,_18,_19,_0.01),_0px_61px_37px_0px_rgba(18,_18,_19,_0.05),_0px_27px_27px_0px_rgba(18,_18,_19,_0.09),_0px_7px_15px_0px_rgba(18,_18,_19,_0.10)]">
+            <div className="space-y-6">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-slate-12 mb-2">Sound Library</h3>
+                <p className="text-slate-10 text-sm">Available audio feedback options</p>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">🔔</span>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-slate-12">Gentle Chime</div>
+                      <div className="text-xs text-slate-10">Soft notification</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">📢</span>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-slate-12">Soft Beep</div>
+                      <div className="text-xs text-slate-10">Alert sound</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">🎵</span>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-slate-12">Musical Tone</div>
+                      <div className="text-xs text-slate-10">Melodic feedback</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">🌿</span>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-slate-12">Nature Sound</div>
+                      <div className="text-xs text-slate-10">Organic feedback</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">🎶</span>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-slate-12">Whistle</div>
+                      <div className="text-xs text-slate-10">Clear signal</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">👆</span>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-slate-12">Click</div>
+                      <div className="text-xs text-slate-10">Quick feedback</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      {/* Form */}
-      <div className="px-1 flex flex-col w-full self-stretch">
-        <InputForm
-          name="email"
-          type="email"
-          placeholder={waitlistData.emailPlaceholder}
-          required
-          buttonCopy={waitlistData.buttonCopy}
-          formAction={handleFormSubmission}
-        />
-      </div>
-    </WaitlistWrapper>
-  )
+
+      <style jsx>{`
+        .slider::-webkit-slider-thumb {
+          appearance: none;
+          height: 20px;
+          width: 20px;
+          border-radius: 50%;
+          background: #1e293b;
+          cursor: pointer;
+        }
+        .slider::-moz-range-thumb {
+          height: 20px;
+          width: 20px;
+          border-radius: 50%;
+          background: #1e293b;
+          cursor: pointer;
+          border: none;
+        }
+      `}</style>
+    </div>
+  );
 }

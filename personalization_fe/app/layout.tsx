@@ -17,15 +17,31 @@ export const viewport: Viewport = {
   maximumScale: 1, // Disable auto-zoom on mobile Safari
 };
 
+// Update metadata for the audio navigation assistant
+export const metadata = {
+  title: "EarEye - Audio Navigation Assistant",
+  description: "Personalize your wearable device audio feedback with EarEye's intelligent object detection system.",
+  openGraph: {
+    type: "website",
+    title: "EarEye - Audio Navigation Assistant",
+    description: "Personalize your wearable device audio feedback with EarEye's intelligent object detection system.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "EarEye - Audio Navigation Assistant", 
+    description: "Personalize your wearable device audio feedback with EarEye's intelligent object detection system.",
+  },
+};
+
 // Static settings for the app
 const staticSettings = {
   defaultTheme: "system" as const,
   forcedTheme: null,
   background: {
-    color1: { hex: "#ff6b6b" },
-    color2: { hex: "#4ecdc4" },
-    color3: { hex: "#45b7d1" },
-    color4: { hex: "#f9ca24" },
+    color1: { hex: "#e6f3ff" },
+    color2: { hex: "#cce7ff" },
+    color3: { hex: "#a6d5ff" },
+    color4: { hex: "#80c4ff" },
     speed: 1.5,
   },
 };
@@ -61,8 +77,8 @@ export default function RootLayout({
               height: "100%",
             }}
           />
-          <div className="max-w-screen-sm mx-auto w-full relative z-[1] flex flex-col min-h-screen">
-            <div className="px-5 gap-8 flex flex-col flex-1 py-[12vh]">
+          <div className="max-w-7xl mx-auto w-full relative z-[1] flex flex-col min-h-screen">
+            <div className="px-5 gap-8 flex flex-col flex-1 py-[5vh]">
               <Header />
               <main className="flex justify-center">{children}</main>
             </div>
