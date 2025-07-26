@@ -1,9 +1,10 @@
 import type { Viewport } from "next";
 import { Geist } from "next/font/google";
-import { Providers } from "@/context";
+import { Providers } from "@/context/providers";
 import { Header } from "@/components/header";
 import { MeshGradientComponent } from "@/components/mesh-gradient";
 import "./globals.css";
+import { ClientLayout } from "./client-layout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -77,12 +78,7 @@ export default function RootLayout({
               height: "100%",
             }}
           />
-          <div className="max-w-7xl mx-auto w-full relative z-[1] flex flex-col min-h-screen">
-            <div className="px-5 gap-8 flex flex-col flex-1 py-[5vh]">
-              <Header />
-              <main className="flex justify-center">{children}</main>
-            </div>
-          </div>
+          <ClientLayout>{children}</ClientLayout>
         </Providers>
       </body>
     </html>

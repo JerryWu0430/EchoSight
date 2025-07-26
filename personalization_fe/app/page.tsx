@@ -1,11 +1,13 @@
 "use client"
 import { WaitlistWrapper } from "@/components/box";
-import { useState } from "react";
-import { Play } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Play, RotateCcw } from "lucide-react";
+import { useAppContext } from "@/context";
+import { useRouter } from "next/navigation";
 
 const soundOptions = [
   "Tone Sound",
-  "Chime Sound", 
+  "Chime Sound",
   "Click Sound",
   "Beep Sound",
   "Musical Sound",
@@ -15,27 +17,64 @@ const soundOptions = [
 ];
 
 export default function Home() {
+  const { hasCompletedForm, formData, logChoices, resetForm } = useAppContext();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"sound" | "objects">("sound");
   const [volume, setVolume] = useState(75);
   const [frequency, setFrequency] = useState(50);
   const [objectSounds, setObjectSounds] = useState({
     cars: "Tone Sound",
-    people: "Chime Sound", 
+    people: "Chime Sound",
     static: "Click Sound"
   });
+
+  // Redirect to form if not completed
+  useEffect(() => {
+    if (!hasCompletedForm) {
+      router.push('/form');
+    }
+  }, [hasCompletedForm, router]);
+
+  // Update volume and frequency from form data
+  useEffect(() => {
+    if (formData) {
+      // Convert form data to percentage values
+      const audioLevelToPercentage = (level: number) => {
+        switch (level) {
+          case 0: return 25; // Low
+          case 1: return 75; // Medium
+          case 2: return 100; // High
+          default: return 75;
+        }
+      };
+
+      const frequencyLevelToPercentage = (level: number) => {
+        switch (level) {
+          case 0: return 25; // Low
+          case 1: return 50; // Medium
+          case 2: return 100; // High
+          default: return 50;
+        }
+      };
+
+      setVolume(audioLevelToPercentage(formData.audioLevel));
+      setFrequency(frequencyLevelToPercentage(formData.frequencyLevel));
+      logChoices();
+    }
+  }, [formData, logChoices]);
 
   const playPreview = (soundType: string, category: string) => {
     console.log(`Playing preview for ${category}: ${soundType}`);
     // Here you would implement actual audio playback
-    
+
     // Simple Web Audio API demo
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
-    
+
     oscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
-    
+
     const frequencies: { [key: string]: number } = {
       "Tone Sound": 440,
       "Chime Sound": 800,
@@ -46,17 +85,46 @@ export default function Home() {
       "Voice Alert": 300,
       "Harmonic Sound": 660
     };
-    
+
     oscillator.frequency.setValueAtTime(frequencies[soundType] || 440, audioContext.currentTime);
     gainNode.gain.setValueAtTime(volume / 100 * 0.3, audioContext.currentTime);
     gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-    
+
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 0.5);
   };
 
+  const handleResetForm = () => {
+    resetForm();
+    router.push('/form');
+  };
+
+  // Show loading while checking form completion
+  if (!hasCompletedForm) {
+    return (
+      <WaitlistWrapper>
+        <div className="text-center space-y-4">
+          <div className="text-4xl">⏳</div>
+          <h1 className="text-2xl font-medium text-slate-12">Loading...</h1>
+          <p className="text-slate-10">Redirecting to setup form...</p>
+        </div>
+      </WaitlistWrapper>
+    );
+  }
+
   return (
     <div className="w-full max-w-7xl mx-auto">
+      {/* Reset Button for Testing */}
+      <div className="mb-4 flex justify-end">
+        <button
+          onClick={handleResetForm}
+          className="flex items-center space-x-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+        >
+          <RotateCcw className="w-4 h-4" />
+          <span>Reset Form (Hard Refresh)</span>
+        </button>
+      </div>
+
       {/* Main Layout with Side Containers */}
       <div className="flex gap-6">
         {/* Left Side Containers */}
@@ -68,7 +136,7 @@ export default function Home() {
                 <h3 className="text-lg font-semibold text-slate-12 mb-2">Audio Preferences</h3>
                 <p className="text-slate-10 text-sm">Audio feedback summary</p>
               </div>
-              
+
               <div className="space-y-3">
                 <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
                   <div className="flex items-center justify-between">
@@ -76,24 +144,26 @@ export default function Home() {
                     <span className="text-sm font-medium text-slate-12">{volume}%</span>
                   </div>
                 </div>
-                
+
                 <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-slate-11">Frequency</span>
                     <span className="text-sm font-medium text-slate-12">{frequency}%</span>
                   </div>
                 </div>
-                
+
                 <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-slate-11">Active Sounds</span>
-                    <span className="text-sm font-medium text-slate-12">3</span>
+                    <span className="text-sm font-medium text-slate-12">
+                      {formData?.soundTracks?.length || 0}
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          
+
           {/* Bottom Left Container */}
           <div className="bg-gray-1/85 rounded-2xl p-6 shadow-[0px_170px_48px_0px_rgba(18,_18,_19,_0.00),_0px_109px_44px_0px_rgba(18,_18,_19,_0.01),_0px_61px_37px_0px_rgba(18,_18,_19,_0.05),_0px_27px_27px_0px_rgba(18,_18,_19,_0.09),_0px_7px_15px_0px_rgba(18,_18,_19,_0.10)]">
             <div className="space-y-4">
@@ -101,7 +171,7 @@ export default function Home() {
                 <h3 className="text-lg font-semibold text-slate-12 mb-2">Recent Activity</h3>
                 <p className="text-slate-10 text-sm">Latest audio feedback events</p>
               </div>
-              
+
               <div className="space-y-3">
                 <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
                   <div className="flex items-center space-x-2">
@@ -112,7 +182,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
                   <div className="flex items-center space-x-2">
                     <span className="text-lg">👥</span>
@@ -122,7 +192,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
                   <div className="flex items-center space-x-2">
                     <span className="text-lg">📦</span>
@@ -191,7 +261,7 @@ export default function Home() {
                     <div className="space-y-6">
                       <h3 className="text-lg font-semibold text-slate-12">Audio Controls</h3>
                       <p className="text-slate-10 text-sm">Adjust volume and feedback frequency</p>
-                      
+
                       {/* Volume Control */}
                       <div className="space-y-3">
                         <label className="block text-sm font-medium text-slate-11">
@@ -239,7 +309,7 @@ export default function Home() {
                         <span className="text-xl">🚗</span>
                         <h3 className="font-semibold text-slate-12">Cars & Vehicles</h3>
                       </div>
-                      
+
                       <div className="space-y-3">
                         <label className="block text-sm font-medium text-slate-11">
                           Select Sound
@@ -253,7 +323,7 @@ export default function Home() {
                             <option key={option} value={option}>{option}</option>
                           ))}
                         </select>
-                        
+
                         <button
                           onClick={() => playPreview(objectSounds.cars, "cars")}
                           className="w-full flex items-center justify-center space-x-2 py-2 px-4 border border-gray-6 rounded-md text-sm font-medium text-slate-11 hover:bg-gray-3 transition-colors"
@@ -270,7 +340,7 @@ export default function Home() {
                         <span className="text-xl">👥</span>
                         <h3 className="font-semibold text-slate-12">People & Animals</h3>
                       </div>
-                      
+
                       <div className="space-y-3">
                         <label className="block text-sm font-medium text-slate-11">
                           Select Sound
@@ -284,7 +354,7 @@ export default function Home() {
                             <option key={option} value={option}>{option}</option>
                           ))}
                         </select>
-                        
+
                         <button
                           onClick={() => playPreview(objectSounds.people, "people")}
                           className="w-full flex items-center justify-center space-x-2 py-2 px-4 border border-gray-6 rounded-md text-sm font-medium text-slate-11 hover:bg-gray-3 transition-colors"
@@ -301,7 +371,7 @@ export default function Home() {
                         <span className="text-xl">📦</span>
                         <h3 className="font-semibold text-slate-12">Static Objects</h3>
                       </div>
-                      
+
                       <div className="space-y-3">
                         <label className="block text-sm font-medium text-slate-11">
                           Select Sound
@@ -315,7 +385,7 @@ export default function Home() {
                             <option key={option} value={option}>{option}</option>
                           ))}
                         </select>
-                        
+
                         <button
                           onClick={() => playPreview(objectSounds.static, "static")}
                           className="w-full flex items-center justify-center space-x-2 py-2 px-4 border border-gray-6 rounded-md text-sm font-medium text-slate-11 hover:bg-gray-3 transition-colors"
@@ -353,7 +423,7 @@ export default function Home() {
                 <h3 className="text-lg font-semibold text-slate-12 mb-2">Sound Library</h3>
                 <p className="text-slate-10 text-sm">Available audio feedback options</p>
               </div>
-              
+
               <div className="space-y-3">
                 <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
                   <div className="flex items-center space-x-2">
@@ -364,7 +434,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
                   <div className="flex items-center space-x-2">
                     <span className="text-lg">📢</span>
@@ -374,7 +444,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
                   <div className="flex items-center space-x-2">
                     <span className="text-lg">🎵</span>
@@ -384,7 +454,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
                   <div className="flex items-center space-x-2">
                     <span className="text-lg">🌿</span>
@@ -394,7 +464,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
                   <div className="flex items-center space-x-2">
                     <span className="text-lg">🎶</span>
@@ -404,7 +474,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
                   <div className="flex items-center space-x-2">
                     <span className="text-lg">👆</span>
