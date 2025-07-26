@@ -17,6 +17,22 @@ export const viewport: Viewport = {
   maximumScale: 1, // Disable auto-zoom on mobile Safari
 };
 
+// Update metadata for the audio navigation assistant
+export const metadata = {
+  title: "EarEye - Audio Navigation Assistant",
+  description: "Personalize your wearable device audio feedback with EarEye's intelligent object detection system.",
+  openGraph: {
+    type: "website",
+    title: "EarEye - Audio Navigation Assistant",
+    description: "Personalize your wearable device audio feedback with EarEye's intelligent object detection system.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "EarEye - Audio Navigation Assistant", 
+    description: "Personalize your wearable device audio feedback with EarEye's intelligent object detection system.",
+  },
+};
+
 // Static settings for the app
 const staticSettings = {
   defaultTheme: "system" as const,
@@ -61,8 +77,8 @@ export default function RootLayout({
               height: "100%",
             }}
           />
-          <div className="max-w-screen-sm mx-auto w-full relative z-[1] flex flex-col min-h-screen">
-            <div className="px-5 gap-8 flex flex-col flex-1 py-[12vh]">
+          <div className="max-w-7xl mx-auto w-full relative z-[1] flex flex-col min-h-screen">
+            <div className="px-5 gap-8 flex flex-col flex-1 py-[5vh]">
               <Header />
               <main className="flex justify-center">{children}</main>
             </div>

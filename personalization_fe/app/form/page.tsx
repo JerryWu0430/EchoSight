@@ -37,16 +37,16 @@ const questions = [
   {
     id: "soundTracks",
     title: "Choose your preferred sample sound tracks:",
-    type: "checkbox-group" as const,
+    type: "sound-grid" as const,
     options: [
-      { value: "gentle-chime", label: "Gentle Chime" },
-      { value: "soft-beep", label: "Soft Beep" },
-      { value: "musical-tone", label: "Musical Tone" },
-      { value: "nature-sound", label: "Nature Sound" },
-      { value: "whistle", label: "Whistle" },
-      { value: "click", label: "Click" },
-      { value: "voice-alert", label: "Voice Alert" },
-      { value: "harmonic", label: "Harmonic" },
+      { value: "gentle-chime", label: "Gentle Chime", emoji: "🔔" },
+      { value: "soft-beep", label: "Soft Beep", emoji: "📢" },
+      { value: "musical-tone", label: "Musical Tone", emoji: "🎵" },
+      { value: "nature-sound", label: "Nature Sound", emoji: "🌿" },
+      { value: "whistle", label: "Whistle", emoji: "🎶" },
+      { value: "click", label: "Click", emoji: "👆" },
+      { value: "voice-alert", label: "Voice Alert", emoji: "🗣️" },
+      { value: "harmonic", label: "Harmonic", emoji: "🎼" },
     ],
     required: true,
   },
@@ -81,11 +81,61 @@ export default function FormPage() {
     }
   };
 
+  const handleSoundSelect = (soundValue: string) => {
+    // Play audio sample (simulate with console for now)
+    console.log(`Playing audio sample: ${soundValue}`);
+    
+    // Toggle selection
+    const currentValues = formData.soundTracks;
+    const isSelected = currentValues.includes(soundValue);
+    
+    if (isSelected) {
+      updateFormData("soundTracks", currentValues.filter(item => item !== soundValue));
+    } else {
+      updateFormData("soundTracks", [...currentValues, soundValue]);
+    }
+
+    // Simulate audio playback
+    playAudioSample(soundValue);
+  };
+
+  const playAudioSample = (soundType: string) => {
+    // Create a simple beep sound for demonstration
+    // In a real app, you'd load actual audio files
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    // Different frequencies for different sounds
+    const frequencies: { [key: string]: number } = {
+      "gentle-chime": 800,
+      "soft-beep": 440,
+      "musical-tone": 523,
+      "nature-sound": 200,
+      "whistle": 1000,
+      "click": 1200,
+      "voice-alert": 300,
+      "harmonic": 660
+    };
+    
+    oscillator.frequency.setValueAtTime(frequencies[soundType] || 440, audioContext.currentTime);
+    oscillator.type = soundType === "nature-sound" ? "sawtooth" : "sine";
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+  };
+
   const validateCurrentStep = (): boolean => {
     const question = currentQuestion;
     
     if (question.required) {
-      if (question.type === 'checkbox-group') {
+      if (question.type === 'checkbox-group' || question.type === 'sound-grid') {
         const arrayValue = formData[question.id as keyof FormData] as string[];
         if (!arrayValue || arrayValue.length === 0) {
           setError("Please select at least one option.");
@@ -227,7 +277,7 @@ export default function FormPage() {
           {/* Audio Level Slider */}
           {currentQuestion.type === "slider" && (
             <div className="space-y-4">
-              <div className="w-full max-w-md mx-auto">
+              <div className="w-full max-w-2xl mx-auto">
                 <input
                   type="range"
                   min="0"
@@ -252,7 +302,7 @@ export default function FormPage() {
 
           {/* Checkbox Group */}
           {currentQuestion.type === "checkbox-group" && currentQuestion.options && (
-            <div className="space-y-3 max-w-md mx-auto">
+            <div className="space-y-3 max-w-2xl mx-auto">
               {currentQuestion.options.map((option) => (
                 <label key={option.value} className="flex items-center justify-start text-left">
                   <input
@@ -266,6 +316,41 @@ export default function FormPage() {
                   <span className="text-slate-11 text-base">{option.label}</span>
                 </label>
               ))}
+            </div>
+          )}
+
+          {/* Sound Grid */}
+          {currentQuestion.type === "sound-grid" && currentQuestion.options && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+              {currentQuestion.options.map((option) => {
+                const isSelected = formData.soundTracks.includes(option.value);
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => handleSoundSelect(option.value)}
+                    disabled={state === "loading"}
+                    className={`
+                      relative flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all duration-200 min-h-[100px]
+                      ${isSelected 
+                        ? 'border-slate-8 bg-slate-8/10 shadow-md' 
+                        : 'border-gray-6 bg-gray-3 hover:border-gray-8 hover:bg-gray-4'
+                      }
+                      disabled:opacity-50 disabled:cursor-not-allowed
+                    `}
+                  >
+                    <div className="text-3xl mb-2">{option.emoji}</div>
+                    <div className="text-sm text-slate-11 text-center font-medium">
+                      {option.label}
+                    </div>
+                    {isSelected && (
+                      <div className="absolute top-2 right-2 w-5 h-5 bg-slate-8 rounded-full flex items-center justify-center">
+                        <Check className="w-3 h-3 text-white" />
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
