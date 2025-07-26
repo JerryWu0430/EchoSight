@@ -22,7 +22,7 @@ type FormData = {
 const questions = [
   {
     id: "audioSettings",
-    title: "Audio Settings",
+    //title: "Audio Settings",
     type: "dual-slider" as const,
     required: true,
   },
@@ -31,9 +31,21 @@ const questions = [
     title: "Select what you don't want feedback from:",
     type: "checkbox-group" as const,
     options: [
-      { value: "slow", label: "Slow object" },
-      { value: "fast", label: "Fast object" },
-      { value: "static", label: "Static object" },
+      { 
+        value: "slow", 
+        label: "Slow object", 
+        examples: "Cars, bicycles, pedestrians walking slowly"
+      },
+      { 
+        value: "fast", 
+        label: "Fast object", 
+        examples: "Running people, speeding vehicles, animals"
+      },
+      { 
+        value: "static", 
+        label: "Static object", 
+        examples: "Walls, furniture, parked cars, trees"
+      },
     ],
     required: false,
   },
@@ -348,18 +360,21 @@ export default function FormPage() {
 
           {/* Checkbox Group */}
           {currentQuestion.type === "checkbox-group" && currentQuestion.options && (
-            <div className="space-y-3 max-w-2xl mx-auto">
+            <div className="space-y-4 max-w-2xl mx-auto">
               {currentQuestion.options.map((option) => (
-                <label key={option.value} className="flex items-center justify-start text-left">
+                <label key={option.value} className="flex items-start justify-start text-left p-4 border border-gray-6 rounded-lg hover:bg-gray-2 transition-colors cursor-pointer">
                   <input
                     type="checkbox"
                     value={option.value}
                     checked={(formData[currentQuestion.id as keyof FormData] as string[]).includes(option.value)}
                     onChange={(e) => handleCheckboxChange(currentQuestion.id as keyof FormData, option.value, e.target.checked)}
-                    className="mr-3 text-slate-8 focus:ring-slate-8"
+                    className="mr-3 mt-1 text-slate-8 focus:ring-slate-8"
                     disabled={state === "loading"}
                   />
-                  <span className="text-slate-11 text-base">{option.label}</span>
+                  <div className="flex-1">
+                    <div className="text-slate-11 text-base font-medium">{option.label}</div>
+                    <div className="text-slate-10 text-sm mt-1">{option.examples}</div>
+                  </div>
                 </label>
               ))}
             </div>

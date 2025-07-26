@@ -19,12 +19,11 @@ const soundOptions = [
 export default function Home() {
   const { hasCompletedForm, formData, logChoices, resetForm } = useAppContext();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"sound" | "objects">("sound");
   const [volume, setVolume] = useState(75);
   const [frequency, setFrequency] = useState(50);
   const [objectSounds, setObjectSounds] = useState({
-    cars: "Tone Sound",
-    people: "Chime Sound",
+    slow: "Tone Sound",
+    fast: "Chime Sound", 
     static: "Click Sound"
   });
 
@@ -139,17 +138,35 @@ export default function Home() {
 
               <div className="space-y-3">
                 <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-slate-11">Volume Level</span>
                     <span className="text-sm font-medium text-slate-12">{volume}%</span>
                   </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="5"
+                    value={volume}
+                    onChange={(e) => setVolume(parseInt(e.target.value))}
+                    className="w-full h-2 bg-gray-6 rounded-lg appearance-none cursor-pointer slider"
+                  />
                 </div>
 
                 <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-slate-11">Frequency</span>
                     <span className="text-sm font-medium text-slate-12">{frequency}%</span>
                   </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="5"
+                    value={frequency}
+                    onChange={(e) => setFrequency(parseInt(e.target.value))}
+                    className="w-full h-2 bg-gray-6 rounded-lg appearance-none cursor-pointer slider"
+                  />
                 </div>
 
                 <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
@@ -210,7 +227,7 @@ export default function Home() {
         {/* Main Content */}
         <div className="flex-1">
           <WaitlistWrapper>
-            <div className="w-full space-y-8">
+            <div className="w-full space-y-6">
               {/* Header */}
               <div className="text-center space-y-2">
                 <h1 className="text-2xl sm:text-3xl font-bold text-slate-12">
@@ -221,182 +238,125 @@ export default function Home() {
                 </p>
               </div>
 
-              {/* Audio Preferences Section */}
-              <div className="space-y-6">
+              {/* Object Categories Section */}
+              <div className="space-y-4">
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-12 mb-2">Audio Preferences</h2>
+                  <h2 className="text-xl font-semibold text-slate-12 mb-2">Object Categories</h2>
                   <p className="text-slate-10 text-sm">
-                    Customize your audio feedback settings for different object types and situations.
+                    Customize audio feedback for different types of objects and situations.
                   </p>
                 </div>
 
-                {/* Tabs */}
-                <div className="flex space-x-1 bg-gray-6 p-1 rounded-lg">
-                  <button
-                    onClick={() => setActiveTab("sound")}
-                    className={`flex-1 flex items-center justify-center py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                      activeTab === "sound"
-                        ? "bg-blue-100 text-blue-700 shadow-sm"
-                        : "text-slate-10 hover:text-slate-12"
-                    }`}
-                  >
-                    🔊 Sound Settings
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("objects")}
-                    className={`flex-1 flex items-center justify-center py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                      activeTab === "objects"
-                        ? "bg-blue-100 text-blue-700 shadow-sm"
-                        : "text-slate-10 hover:text-slate-12"
-                    }`}
-                  >
-                    ⚙️ Object Categories
-                  </button>
+                {/* Object Categories Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Slow Object */}
+                  <div className={`bg-gray-2 border border-gray-6 rounded-lg p-4 space-y-3 ${
+                    formData?.noFeedbackFrom?.includes('slow') ? 'opacity-50 grayscale' : ''
+                  }`}>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xl">🚶</span>
+                      <h3 className="font-semibold text-slate-12">Slow Object</h3>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <p className="text-sm text-slate-10">Cars, bicycles, pedestrians walking slowly</p>
+                      <label className="block text-sm font-medium text-slate-11">
+                        Select Sound
+                      </label>
+                      <select
+                        value={objectSounds.slow || "Tone Sound"}
+                        onChange={(e) => setObjectSounds({...objectSounds, slow: e.target.value})}
+                        className="w-full px-3 py-2 bg-white border border-gray-6 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        disabled={formData?.noFeedbackFrom?.includes('slow')}
+                      >
+                        {soundOptions.map(option => (
+                          <option key={option} value={option}>{option}</option>
+                        ))}
+                      </select>
+                      
+                      <button
+                        onClick={() => playPreview(objectSounds.slow || "Tone Sound", "slow")}
+                        className="w-full flex items-center justify-center space-x-2 py-2 px-4 border border-gray-6 rounded-md text-sm font-medium text-slate-11 hover:bg-gray-3 transition-colors"
+                        disabled={formData?.noFeedbackFrom?.includes('slow')}
+                      >
+                        <Play className="w-4 h-4" />
+                        <span>Preview</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Fast Object */}
+                  <div className={`bg-gray-2 border border-gray-6 rounded-lg p-4 space-y-3 ${
+                    formData?.noFeedbackFrom?.includes('fast') ? 'opacity-50 grayscale' : ''
+                  }`}>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xl">🏃</span>
+                      <h3 className="font-semibold text-slate-12">Fast Object</h3>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <p className="text-sm text-slate-10">Running people, speeding vehicles, animals</p>
+                      <label className="block text-sm font-medium text-slate-11">
+                        Select Sound
+                      </label>
+                      <select
+                        value={objectSounds.fast || "Chime Sound"}
+                        onChange={(e) => setObjectSounds({...objectSounds, fast: e.target.value})}
+                        className="w-full px-3 py-2 bg-white border border-gray-6 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        disabled={formData?.noFeedbackFrom?.includes('fast')}
+                      >
+                        {soundOptions.map(option => (
+                          <option key={option} value={option}>{option}</option>
+                        ))}
+                      </select>
+                      
+                      <button
+                        onClick={() => playPreview(objectSounds.fast || "Chime Sound", "fast")}
+                        className="w-full flex items-center justify-center space-x-2 py-2 px-4 border border-gray-6 rounded-md text-sm font-medium text-slate-11 hover:bg-gray-3 transition-colors"
+                        disabled={formData?.noFeedbackFrom?.includes('fast')}
+                      >
+                        <Play className="w-4 h-4" />
+                        <span>Preview</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Static Object */}
+                  <div className={`bg-gray-2 border border-gray-6 rounded-lg p-4 space-y-3 ${
+                    formData?.noFeedbackFrom?.includes('static') ? 'opacity-50 grayscale' : ''
+                  }`}>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xl">🏠</span>
+                      <h3 className="font-semibold text-slate-12">Static Object</h3>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <p className="text-sm text-slate-10">Walls, furniture, parked cars, trees</p>
+                      <label className="block text-sm font-medium text-slate-11">
+                        Select Sound
+                      </label>
+                      <select
+                        value={objectSounds.static || "Click Sound"}
+                        onChange={(e) => setObjectSounds({...objectSounds, static: e.target.value})}
+                        className="w-full px-3 py-2 bg-white border border-gray-6 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        disabled={formData?.noFeedbackFrom?.includes('static')}
+                      >
+                        {soundOptions.map(option => (
+                          <option key={option} value={option}>{option}</option>
+                        ))}
+                      </select>
+                      
+                      <button
+                        onClick={() => playPreview(objectSounds.static || "Click Sound", "static")}
+                        className="w-full flex items-center justify-center space-x-2 py-2 px-4 border border-gray-6 rounded-md text-sm font-medium text-slate-11 hover:bg-gray-3 transition-colors"
+                        disabled={formData?.noFeedbackFrom?.includes('static')}
+                      >
+                        <Play className="w-4 h-4" />
+                        <span>Preview</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
-
-                {/* Sound Settings Tab */}
-                {activeTab === "sound" && (
-                  <div className="space-y-8">
-                    {/* Audio Controls */}
-                    <div className="space-y-6">
-                      <h3 className="text-lg font-semibold text-slate-12">Audio Controls</h3>
-                      <p className="text-slate-10 text-sm">Adjust volume and feedback frequency</p>
-
-                      {/* Volume Control */}
-                      <div className="space-y-3">
-                        <label className="block text-sm font-medium text-slate-11">
-                          Volume: {volume}%
-                        </label>
-                        <input
-                          type="range"
-                          min="0"
-                          max="100"
-                          step="5"
-                          value={volume}
-                          onChange={(e) => setVolume(parseInt(e.target.value))}
-                          className="w-full h-2 bg-gray-6 rounded-lg appearance-none cursor-pointer slider"
-                        />
-                      </div>
-
-                      {/* Frequency Control */}
-                      <div className="space-y-3">
-                        <label className="block text-sm font-medium text-slate-11">
-                          Feedback Frequency: {frequency}%
-                        </label>
-                        <input
-                          type="range"
-                          min="0"
-                          max="100"
-                          step="5"
-                          value={frequency}
-                          onChange={(e) => setFrequency(parseInt(e.target.value))}
-                          className="w-full h-2 bg-gray-6 rounded-lg appearance-none cursor-pointer slider"
-                        />
-                        <p className="text-xs text-slate-9">
-                          Higher frequency means more frequent audio updates
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Object Categories Tab */}
-                {activeTab === "objects" && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Cars & Vehicles */}
-                    <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 space-y-4">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-xl">🚗</span>
-                        <h3 className="font-semibold text-slate-12">Cars & Vehicles</h3>
-                      </div>
-
-                      <div className="space-y-3">
-                        <label className="block text-sm font-medium text-slate-11">
-                          Select Sound
-                        </label>
-                        <select
-                          value={objectSounds.cars}
-                          onChange={(e) => setObjectSounds({...objectSounds, cars: e.target.value})}
-                          className="w-full px-3 py-2 bg-white border border-gray-6 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          {soundOptions.map(option => (
-                            <option key={option} value={option}>{option}</option>
-                          ))}
-                        </select>
-
-                        <button
-                          onClick={() => playPreview(objectSounds.cars, "cars")}
-                          className="w-full flex items-center justify-center space-x-2 py-2 px-4 border border-gray-6 rounded-md text-sm font-medium text-slate-11 hover:bg-gray-3 transition-colors"
-                        >
-                          <Play className="w-4 h-4" />
-                          <span>Preview</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* People & Animals */}
-                    <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 space-y-4">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-xl">👥</span>
-                        <h3 className="font-semibold text-slate-12">People & Animals</h3>
-                      </div>
-
-                      <div className="space-y-3">
-                        <label className="block text-sm font-medium text-slate-11">
-                          Select Sound
-                        </label>
-                        <select
-                          value={objectSounds.people}
-                          onChange={(e) => setObjectSounds({...objectSounds, people: e.target.value})}
-                          className="w-full px-3 py-2 bg-white border border-gray-6 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          {soundOptions.map(option => (
-                            <option key={option} value={option}>{option}</option>
-                          ))}
-                        </select>
-
-                        <button
-                          onClick={() => playPreview(objectSounds.people, "people")}
-                          className="w-full flex items-center justify-center space-x-2 py-2 px-4 border border-gray-6 rounded-md text-sm font-medium text-slate-11 hover:bg-gray-3 transition-colors"
-                        >
-                          <Play className="w-4 h-4" />
-                          <span>Preview</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Static Objects */}
-                    <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 space-y-4">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-xl">📦</span>
-                        <h3 className="font-semibold text-slate-12">Static Objects</h3>
-                      </div>
-
-                      <div className="space-y-3">
-                        <label className="block text-sm font-medium text-slate-11">
-                          Select Sound
-                        </label>
-                        <select
-                          value={objectSounds.static}
-                          onChange={(e) => setObjectSounds({...objectSounds, static: e.target.value})}
-                          className="w-full px-3 py-2 bg-white border border-gray-6 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          {soundOptions.map(option => (
-                            <option key={option} value={option}>{option}</option>
-                          ))}
-                        </select>
-
-                        <button
-                          onClick={() => playPreview(objectSounds.static, "static")}
-                          className="w-full flex items-center justify-center space-x-2 py-2 px-4 border border-gray-6 rounded-md text-sm font-medium text-slate-11 hover:bg-gray-3 transition-colors"
-                        >
-                          <Play className="w-4 h-4" />
-                          <span>Preview</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* Save Settings Button */}
@@ -493,19 +453,28 @@ export default function Home() {
       <style jsx>{`
         .slider::-webkit-slider-thumb {
           appearance: none;
-          height: 20px;
-          width: 20px;
+          height: 16px;
+          width: 16px;
           border-radius: 50%;
           background: #1e293b;
           cursor: pointer;
+          border: 2px solid #f8fafc;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .slider::-moz-range-thumb {
-          height: 20px;
-          width: 20px;
+          height: 16px;
+          width: 16px;
           border-radius: 50%;
           background: #1e293b;
           cursor: pointer;
-          border: none;
+          border: 2px solid #f8fafc;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider::-webkit-slider-track {
+          background: transparent;
+        }
+        .slider::-moz-range-track {
+          background: transparent;
         }
       `}</style>
     </div>
