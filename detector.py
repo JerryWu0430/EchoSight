@@ -42,8 +42,8 @@ class SmoothAudioEngine:
     def load_sounds(self):
         """Load the existing sound files"""
         sound_files = {
-            'fast': 'fast.mp3',
-            'slow': 'slow.mp3'
+            'fast': FAST_SOUND,
+            'slow': SLOW_SOUND
         }
         
         # Set up more channels for smooth mixing
