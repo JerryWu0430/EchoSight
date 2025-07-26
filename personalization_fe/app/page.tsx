@@ -62,18 +62,77 @@ export default function Home() {
         {/* Left Side Containers */}
         <div className="flex flex-col gap-6 w-64 flex-shrink-0">
           {/* Top Left Container */}
-          <div className="bg-red-500 rounded-lg p-4 h-64 flex items-center justify-center">
-            <div className="text-white text-center">
-              <h3 className="text-lg font-semibold mb-2">Left Container 1</h3>
-              <p className="text-sm opacity-90">Additional content area</p>
+          <div className="bg-gray-1/85 rounded-2xl p-6 shadow-[0px_170px_48px_0px_rgba(18,_18,_19,_0.00),_0px_109px_44px_0px_rgba(18,_18,_19,_0.01),_0px_61px_37px_0px_rgba(18,_18,_19,_0.05),_0px_27px_27px_0px_rgba(18,_18,_19,_0.09),_0px_7px_15px_0px_rgba(18,_18,_19,_0.10)]">
+            <div className="space-y-4">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-slate-12 mb-2">Quick Stats</h3>
+                <p className="text-slate-10 text-sm">Your audio feedback summary</p>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-11">Volume Level</span>
+                    <span className="text-sm font-medium text-slate-12">{volume}%</span>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-11">Frequency</span>
+                    <span className="text-sm font-medium text-slate-12">{frequency}%</span>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-11">Active Sounds</span>
+                    <span className="text-sm font-medium text-slate-12">3</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           
           {/* Bottom Left Container */}
-          <div className="bg-red-500 rounded-lg p-4 h-64 flex items-center justify-center">
-            <div className="text-white text-center">
-              <h3 className="text-lg font-semibold mb-2">Left Container 2</h3>
-              <p className="text-sm opacity-90">Additional content area</p>
+          <div className="bg-gray-1/85 rounded-2xl p-6 shadow-[0px_170px_48px_0px_rgba(18,_18,_19,_0.00),_0px_109px_44px_0px_rgba(18,_18,_19,_0.01),_0px_61px_37px_0px_rgba(18,_18,_19,_0.05),_0px_27px_27px_0px_rgba(18,_18,_19,_0.09),_0px_7px_15px_0px_rgba(18,_18,_19,_0.10)]">
+            <div className="space-y-4">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-slate-12 mb-2">Recent Activity</h3>
+                <p className="text-slate-10 text-sm">Latest audio feedback events</p>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">🚗</span>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-slate-12">Vehicle detected</div>
+                      <div className="text-xs text-slate-10">2 minutes ago</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">👥</span>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-slate-12">Person nearby</div>
+                      <div className="text-xs text-slate-10">5 minutes ago</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">📦</span>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-slate-12">Obstacle ahead</div>
+                      <div className="text-xs text-slate-10">8 minutes ago</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -288,10 +347,74 @@ export default function Home() {
 
         {/* Right Side Container */}
         <div className="w-64 flex-shrink-0">
-          <div className="bg-red-500 rounded-lg p-4 h-full flex items-center justify-center">
-            <div className="text-white text-center">
-              <h3 className="text-lg font-semibold mb-2">Right Container</h3>
-              <p className="text-sm opacity-90">Additional content area</p>
+          <div className="bg-gray-1/85 rounded-2xl p-6 shadow-[0px_170px_48px_0px_rgba(18,_18,_19,_0.00),_0px_109px_44px_0px_rgba(18,_18,_19,_0.01),_0px_61px_37px_0px_rgba(18,_18,_19,_0.05),_0px_27px_27px_0px_rgba(18,_18,_19,_0.09),_0px_7px_15px_0px_rgba(18,_18,_19,_0.10)]">
+            <div className="space-y-6">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-slate-12 mb-2">Sound Library</h3>
+                <p className="text-slate-10 text-sm">Available audio feedback options</p>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">🔔</span>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-slate-12">Gentle Chime</div>
+                      <div className="text-xs text-slate-10">Soft notification</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">📢</span>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-slate-12">Soft Beep</div>
+                      <div className="text-xs text-slate-10">Alert sound</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">🎵</span>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-slate-12">Musical Tone</div>
+                      <div className="text-xs text-slate-10">Melodic feedback</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">🌿</span>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-slate-12">Nature Sound</div>
+                      <div className="text-xs text-slate-10">Organic feedback</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">🎶</span>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-slate-12">Whistle</div>
+                      <div className="text-xs text-slate-10">Clear signal</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">👆</span>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-slate-12">Click</div>
+                      <div className="text-xs text-slate-10">Quick feedback</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
