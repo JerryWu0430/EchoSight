@@ -6,72 +6,60 @@ import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 // Static form content
 const staticFormData = {
   title: "Feedback Preferences",
-  subtitle: "Help us customize your EarEye experience by telling us about your preferences for object detection and sound feedback.",
+  subtitle: "Help us customize your EarEye experience with these quick settings.",
 };
 
 type FormState = "idle" | "loading" | "success" | "error";
 type FormData = {
-  feedbackObjects: string;
-  ignoreObjects: string;
-  soundType: string;
-  frequency: string;
-  email: string;
+  audioLevel: number; // 0: low, 1: medium, 2: high
+  noFeedbackFrom: string[]; // Array of objects to ignore
+  soundTracks: string[]; // Array of selected sound tracks
 };
 
 const questions = [
   {
-    id: "feedbackObjects",
-    title: "What object types do you want feedback from?",
-    type: "text" as const,
-    placeholder: "e.g., cars, dogs, bins, people, bicycles",
-    required: false,
+    id: "audioLevel",
+    title: "What audio level do you prefer?",
+    type: "slider" as const,
+    required: true,
   },
   {
-    id: "ignoreObjects", 
-    title: "What object types do you want to ignore?",
-    type: "text" as const,
-    placeholder: "e.g., small objects, plants, static items",
-    required: false,
-  },
-  {
-    id: "soundType",
-    title: "What kind of sound do you prefer?",
-    type: "radio" as const,
+    id: "noFeedbackFrom",
+    title: "Select what you don't want feedback from:",
+    type: "checkbox-group" as const,
     options: [
-      { value: "musical", label: "Musical" },
+      { value: "slow", label: "Slow object" },
+      { value: "fast", label: "Fast object" },
+      { value: "static", label: "Static object" },
+    ],
+    required: false,
+  },
+  {
+    id: "soundTracks",
+    title: "Choose your preferred sample sound tracks:",
+    type: "checkbox-group" as const,
+    options: [
+      { value: "gentle-chime", label: "Gentle Chime" },
+      { value: "soft-beep", label: "Soft Beep" },
+      { value: "musical-tone", label: "Musical Tone" },
+      { value: "nature-sound", label: "Nature Sound" },
       { value: "whistle", label: "Whistle" },
-      { value: "beep", label: "Beep" },
+      { value: "click", label: "Click" },
+      { value: "voice-alert", label: "Voice Alert" },
+      { value: "harmonic", label: "Harmonic" },
     ],
-    required: true,
-  },
-  {
-    id: "frequency",
-    title: "How often do you want sound feedback?",
-    type: "radio" as const,
-    options: [
-      { value: "frequent", label: "Frequent" },
-      { value: "occasional", label: "Occasional" },
-      { value: "minimal", label: "Minimal" },
-    ],
-    required: true,
-  },
-  {
-    id: "email",
-    title: "What's your email address?",
-    type: "email" as const,
-    placeholder: "your@email.com",
     required: true,
   },
 ];
 
+const audioLevels = ["Low", "Medium", "High"];
+
 export default function FormPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<FormData>({
-    feedbackObjects: "",
-    ignoreObjects: "",
-    soundType: "",
-    frequency: "",
-    email: "",
+    audioLevel: 1, // Default to medium
+    noFeedbackFrom: [],
+    soundTracks: [],
   });
   const [state, setState] = useState<FormState>("idle");
   const [error, setError] = useState<string>("");
@@ -80,22 +68,30 @@ export default function FormPage() {
   const isLastStep = currentStep === questions.length - 1;
   const isFirstStep = currentStep === 0;
 
-  const updateFormData = (field: keyof FormData, value: string) => {
+  const updateFormData = (field: keyof FormData, value: number | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleCheckboxChange = (field: keyof FormData, value: string, checked: boolean) => {
+    const currentValues = formData[field] as string[];
+    if (checked) {
+      updateFormData(field, [...currentValues, value]);
+    } else {
+      updateFormData(field, currentValues.filter(item => item !== value));
+    }
   };
 
   const validateCurrentStep = (): boolean => {
     const question = currentQuestion;
-    const value = formData[question.id as keyof FormData];
     
-    if (question.required && !value) {
-      setError(`Please ${question.type === 'radio' ? 'select an option' : 'enter a value'} for this question.`);
-      return false;
-    }
-    
-    if (question.type === 'email' && value && !value.includes('@')) {
-      setError("Please enter a valid email address.");
-      return false;
+    if (question.required) {
+      if (question.type === 'checkbox-group') {
+        const arrayValue = formData[question.id as keyof FormData] as string[];
+        if (!arrayValue || arrayValue.length === 0) {
+          setError("Please select at least one option.");
+          return false;
+        }
+      }
     }
     
     setError("");
@@ -128,7 +124,10 @@ export default function FormPage() {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      console.log("Feedback preferences submission:", formData);
+      console.log("Feedback preferences submission:", {
+        ...formData,
+        audioLevelText: audioLevels[formData.audioLevel]
+      });
       setState("success");
       
       // Reset form after 3 seconds
@@ -136,11 +135,9 @@ export default function FormPage() {
         setState("idle");
         setCurrentStep(0);
         setFormData({
-          feedbackObjects: "",
-          ignoreObjects: "",
-          soundType: "",
-          frequency: "",
-          email: "",
+          audioLevel: 1,
+          noFeedbackFrom: [],
+          soundTracks: [],
         });
       }, 3000);
       
@@ -227,33 +224,46 @@ export default function FormPage() {
             {currentQuestion.title}
           </h2>
           
-          {/* Text/Email Input */}
-          {(currentQuestion.type === "text" || currentQuestion.type === "email") && (
-            <input
-              type={currentQuestion.type}
-              value={formData[currentQuestion.id as keyof FormData]}
-              onChange={(e) => updateFormData(currentQuestion.id as keyof FormData, e.target.value)}
-              className="w-full px-4 py-3 bg-gray-11/5 rounded-lg text-gray-12 placeholder:text-gray-9 border border-gray-11/10 focus:outline-none focus:ring-2 focus:ring-slate-8 text-center"
-              placeholder={currentQuestion.placeholder}
-              disabled={state === "loading"}
-            />
+          {/* Audio Level Slider */}
+          {currentQuestion.type === "slider" && (
+            <div className="space-y-4">
+              <div className="w-full max-w-md mx-auto">
+                <input
+                  type="range"
+                  min="0"
+                  max="2"
+                  step="1"
+                  value={formData.audioLevel}
+                  onChange={(e) => updateFormData("audioLevel", parseInt(e.target.value))}
+                  className="w-full h-2 bg-gray-6 rounded-lg appearance-none cursor-pointer slider"
+                  disabled={state === "loading"}
+                />
+                <div className="flex justify-between text-sm text-slate-10 mt-2">
+                  <span>Low</span>
+                  <span>Medium</span>
+                  <span>High</span>
+                </div>
+              </div>
+              <div className="text-lg font-medium text-slate-12">
+                {audioLevels[formData.audioLevel]}
+              </div>
+            </div>
           )}
-          
-          {/* Radio Options */}
-          {currentQuestion.type === "radio" && currentQuestion.options && (
-            <div className="space-y-3">
+
+          {/* Checkbox Group */}
+          {currentQuestion.type === "checkbox-group" && currentQuestion.options && (
+            <div className="space-y-3 max-w-md mx-auto">
               {currentQuestion.options.map((option) => (
-                <label key={option.value} className="flex items-center justify-center">
+                <label key={option.value} className="flex items-center justify-start text-left">
                   <input
-                    type="radio"
-                    name={currentQuestion.id}
+                    type="checkbox"
                     value={option.value}
-                    checked={formData[currentQuestion.id as keyof FormData] === option.value}
-                    onChange={(e) => updateFormData(currentQuestion.id as keyof FormData, e.target.value)}
+                    checked={(formData[currentQuestion.id as keyof FormData] as string[]).includes(option.value)}
+                    onChange={(e) => handleCheckboxChange(currentQuestion.id as keyof FormData, option.value, e.target.checked)}
                     className="mr-3 text-slate-8 focus:ring-slate-8"
                     disabled={state === "loading"}
                   />
-                  <span className="text-slate-11 text-lg">{option.label}</span>
+                  <span className="text-slate-11 text-base">{option.label}</span>
                 </label>
               ))}
             </div>
@@ -267,6 +277,25 @@ export default function FormPage() {
           </div>
         )}
       </div>
+
+      <style jsx>{`
+        .slider::-webkit-slider-thumb {
+          appearance: none;
+          height: 20px;
+          width: 20px;
+          border-radius: 50%;
+          background: #1e293b;
+          cursor: pointer;
+        }
+        .slider::-moz-range-thumb {
+          height: 20px;
+          width: 20px;
+          border-radius: 50%;
+          background: #1e293b;
+          cursor: pointer;
+          border: none;
+        }
+      `}</style>
     </WaitlistWrapper>
   );
 } 
