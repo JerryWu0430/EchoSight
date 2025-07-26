@@ -9,7 +9,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="max-w-7xl mx-auto w-full relative z-[1] flex flex-col min-h-screen">
       <div className="px-5 gap-8 flex flex-col flex-1 py-[5vh]">
-        {!isFormPage && <Header />}
+        {!isFormPage}
         <main className="flex justify-center">{children}</main>
       </div>
     </div>

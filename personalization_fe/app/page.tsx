@@ -1,7 +1,7 @@
 "use client"
 import { WaitlistWrapper } from "@/components/box";
 import { useState, useEffect } from "react";
-import { Play, RotateCcw } from "lucide-react";
+import { Play, RotateCcw, HelpCircle } from "lucide-react";
 import { useAppContext } from "@/context";
 import { useRouter } from "next/navigation";
 
@@ -139,7 +139,16 @@ export default function Home() {
               <div className="space-y-3">
                 <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-slate-11">Volume Level</span>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm text-slate-11">Volume Level</span>
+                      <div className="relative group">
+                        <HelpCircle className="w-4 h-4 text-slate-9 cursor-help" />
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-slate-12 text-slate-1 text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                          Controls the loudness of audio feedback
+                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-12"></div>
+                        </div>
+                      </div>
+                    </div>
                     <span className="text-sm font-medium text-slate-12">{volume}%</span>
                   </div>
                   <input
@@ -155,7 +164,16 @@ export default function Home() {
 
                 <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-slate-11">Frequency</span>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm text-slate-11">Frequency</span>
+                      <div className="relative group">
+                        <HelpCircle className="w-4 h-4 text-slate-9 cursor-help" />
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-slate-12 text-slate-1 text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                          How often audio feedback is provided
+                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-12"></div>
+                        </div>
+                      </div>
+                    </div>
                     <span className="text-sm font-medium text-slate-12">{frequency}%</span>
                   </div>
                   <input
@@ -173,7 +191,7 @@ export default function Home() {
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-slate-11">Active Sounds</span>
                     <span className="text-sm font-medium text-slate-12">
-                      {formData?.soundTracks?.length || 0}
+                      {3 - (formData?.noFeedbackFrom?.length || 0)}
                     </span>
                   </div>
                 </div>
@@ -359,7 +377,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Save Settings Button */}
+              {/* Sync Settings Button */}
               <div className="pt-4">
                 <button
                   onClick={() => {
@@ -368,7 +386,7 @@ export default function Home() {
                   }}
                   className="w-full bg-slate-12 text-slate-1 py-3 px-6 rounded-lg font-medium hover:bg-slate-11 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-8"
                 >
-                  Save Settings
+                  Sync Settings
                 </button>
               </div>
             </div>
