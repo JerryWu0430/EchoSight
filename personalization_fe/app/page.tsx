@@ -256,123 +256,63 @@ export default function Home() {
                 </p>
               </div>
 
-              {/* Object Categories Section */}
+              {/* Sound Library Section */}
               <div className="space-y-4">
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-12 mb-2">Object Categories</h2>
+                  <h2 className="text-xl font-semibold text-slate-12 mb-2">Sound Library</h2>
                   <p className="text-slate-10 text-sm">
-                    Customize audio feedback for different types of objects and situations.
+                    Available audio feedback options for your device.
                   </p>
                 </div>
 
-                {/* Object Categories Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* Slow Object */}
-                  <div className={`bg-gray-2 border border-gray-6 rounded-lg p-4 space-y-3 ${
-                    formData?.noFeedbackFrom?.includes('slow') ? 'opacity-50 grayscale' : ''
-                  }`}>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xl">🚶</span>
-                      <h3 className="font-semibold text-slate-12">Slow Object</h3>
-                    </div>
-                    
-                    <div className="space-y-3">
-                      <p className="text-sm text-slate-10">Cars, bicycles, pedestrians walking slowly</p>
-                      <label className="block text-sm font-medium text-slate-11">
-                        Select Sound
-                      </label>
-                      <select
-                        value={objectSounds.slow || "Tone Sound"}
-                        onChange={(e) => setObjectSounds({...objectSounds, slow: e.target.value})}
-                        className="w-full px-3 py-2 bg-white border border-gray-6 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        disabled={formData?.noFeedbackFrom?.includes('slow')}
-                      >
-                        {soundOptions.map(option => (
-                          <option key={option} value={option}>{option}</option>
-                        ))}
-                      </select>
-                      
-                      <button
-                        onClick={() => playPreview(objectSounds.slow || "Tone Sound", "slow")}
-                        className="w-full flex items-center justify-center space-x-2 py-2 px-4 border border-gray-6 rounded-md text-sm font-medium text-slate-11 hover:bg-gray-3 transition-colors"
-                        disabled={formData?.noFeedbackFrom?.includes('slow')}
-                      >
-                        <Play className="w-4 h-4" />
-                        <span>Preview</span>
-                      </button>
-                    </div>
+                {/* Sound Library Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center">
+                    <div className="text-3xl mb-2">🔔</div>
+                    <div className="text-sm font-medium text-slate-12">Gentle Chime</div>
+                    <div className="text-xs text-slate-10 mt-1">Soft notification</div>
                   </div>
-
-                  {/* Fast Object */}
-                  <div className={`bg-gray-2 border border-gray-6 rounded-lg p-4 space-y-3 ${
-                    formData?.noFeedbackFrom?.includes('fast') ? 'opacity-50 grayscale' : ''
-                  }`}>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xl">🏃</span>
-                      <h3 className="font-semibold text-slate-12">Fast Object</h3>
-                    </div>
-                    
-                    <div className="space-y-3">
-                      <p className="text-sm text-slate-10">Running people, speeding vehicles, animals</p>
-                      <label className="block text-sm font-medium text-slate-11">
-                        Select Sound
-                      </label>
-                      <select
-                        value={objectSounds.fast || "Chime Sound"}
-                        onChange={(e) => setObjectSounds({...objectSounds, fast: e.target.value})}
-                        className="w-full px-3 py-2 bg-white border border-gray-6 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        disabled={formData?.noFeedbackFrom?.includes('fast')}
-                      >
-                        {soundOptions.map(option => (
-                          <option key={option} value={option}>{option}</option>
-                        ))}
-                      </select>
-                      
-                      <button
-                        onClick={() => playPreview(objectSounds.fast || "Chime Sound", "fast")}
-                        className="w-full flex items-center justify-center space-x-2 py-2 px-4 border border-gray-6 rounded-md text-sm font-medium text-slate-11 hover:bg-gray-3 transition-colors"
-                        disabled={formData?.noFeedbackFrom?.includes('fast')}
-                      >
-                        <Play className="w-4 h-4" />
-                        <span>Preview</span>
-                      </button>
-                    </div>
+                  
+                  <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center">
+                    <div className="text-3xl mb-2">📢</div>
+                    <div className="text-sm font-medium text-slate-12">Soft Beep</div>
+                    <div className="text-xs text-slate-10 mt-1">Alert sound</div>
                   </div>
-
-                  {/* Static Object */}
-                  <div className={`bg-gray-2 border border-gray-6 rounded-lg p-4 space-y-3 ${
-                    formData?.noFeedbackFrom?.includes('static') ? 'opacity-50 grayscale' : ''
-                  }`}>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xl">🏠</span>
-                      <h3 className="font-semibold text-slate-12">Static Object</h3>
-                    </div>
-                    
-                    <div className="space-y-3">
-                      <p className="text-sm text-slate-10">Walls, furniture, parked cars, trees</p>
-                      <label className="block text-sm font-medium text-slate-11">
-                        Select Sound
-                      </label>
-                      <select
-                        value={objectSounds.static || "Click Sound"}
-                        onChange={(e) => setObjectSounds({...objectSounds, static: e.target.value})}
-                        className="w-full px-3 py-2 bg-white border border-gray-6 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        disabled={formData?.noFeedbackFrom?.includes('static')}
-                      >
-                        {soundOptions.map(option => (
-                          <option key={option} value={option}>{option}</option>
-                        ))}
-                      </select>
-                      
-                      <button
-                        onClick={() => playPreview(objectSounds.static || "Click Sound", "static")}
-                        className="w-full flex items-center justify-center space-x-2 py-2 px-4 border border-gray-6 rounded-md text-sm font-medium text-slate-11 hover:bg-gray-3 transition-colors"
-                        disabled={formData?.noFeedbackFrom?.includes('static')}
-                      >
-                        <Play className="w-4 h-4" />
-                        <span>Preview</span>
-                      </button>
-                    </div>
+                  
+                  <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center">
+                    <div className="text-3xl mb-2">🎵</div>
+                    <div className="text-sm font-medium text-slate-12">Musical Tone</div>
+                    <div className="text-xs text-slate-10 mt-1">Melodic feedback</div>
+                  </div>
+                  
+                  <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center">
+                    <div className="text-3xl mb-2">🌿</div>
+                    <div className="text-sm font-medium text-slate-12">Nature Sound</div>
+                    <div className="text-xs text-slate-10 mt-1">Organic feedback</div>
+                  </div>
+                  
+                  <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center">
+                    <div className="text-3xl mb-2">🎶</div>
+                    <div className="text-sm font-medium text-slate-12">Whistle</div>
+                    <div className="text-xs text-slate-10 mt-1">Clear signal</div>
+                  </div>
+                  
+                  <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center">
+                    <div className="text-3xl mb-2">👆</div>
+                    <div className="text-sm font-medium text-slate-12">Click</div>
+                    <div className="text-xs text-slate-10 mt-1">Quick feedback</div>
+                  </div>
+                  
+                  <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center">
+                    <div className="text-3xl mb-2">🗣️</div>
+                    <div className="text-sm font-medium text-slate-12">Voice Alert</div>
+                    <div className="text-xs text-slate-10 mt-1">Spoken feedback</div>
+                  </div>
+                  
+                  <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center">
+                    <div className="text-3xl mb-2">🎼</div>
+                    <div className="text-sm font-medium text-slate-12">Harmonic</div>
+                    <div className="text-xs text-slate-10 mt-1">Musical harmony</div>
                   </div>
                 </div>
               </div>
@@ -398,69 +338,105 @@ export default function Home() {
           <div className="bg-gray-1/85 rounded-2xl p-6 shadow-[0px_170px_48px_0px_rgba(18,_18,_19,_0.00),_0px_109px_44px_0px_rgba(18,_18,_19,_0.01),_0px_61px_37px_0px_rgba(18,_18,_19,_0.05),_0px_27px_27px_0px_rgba(18,_18,_19,_0.09),_0px_7px_15px_0px_rgba(18,_18,_19,_0.10)]">
             <div className="space-y-6">
               <div className="text-center">
-                <h3 className="text-lg font-semibold text-slate-12 mb-2">Sound Library</h3>
-                <p className="text-slate-10 text-sm">Available audio feedback options</p>
+                <h3 className="text-lg font-semibold text-slate-12 mb-2">Object Categories</h3>
+                <p className="text-slate-10 text-sm">Configure audio feedback for different object types</p>
               </div>
-
-              <div className="space-y-3">
-                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+              
+              <div className="space-y-4">
+                {/* Slow Object */}
+                <div className={`bg-gray-2 border border-gray-6 rounded-lg p-3 space-y-2 ${
+                  formData?.noFeedbackFrom?.includes('slow') ? 'opacity-50 grayscale' : ''
+                }`}>
                   <div className="flex items-center space-x-2">
-                    <span className="text-lg">🔔</span>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-slate-12">Gentle Chime</div>
-                      <div className="text-xs text-slate-10">Soft notification</div>
-                    </div>
+                    <span className="text-lg">🚶</span>
+                    <h4 className="font-medium text-slate-12 text-sm">Slow Object</h4>
                   </div>
+                  
+                  <p className="text-xs text-slate-10">Cars, bicycles, pedestrians walking slowly</p>
+                  
+                  <select
+                    value={objectSounds.slow || "Tone Sound"}
+                    onChange={(e) => setObjectSounds({...objectSounds, slow: e.target.value})}
+                    className="w-full px-2 py-1 bg-white border border-gray-6 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    disabled={formData?.noFeedbackFrom?.includes('slow')}
+                  >
+                    {soundOptions.map(option => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                  
+                  <button
+                    onClick={() => playPreview(objectSounds.slow || "Tone Sound", "slow")}
+                    className="w-full flex items-center justify-center space-x-1 py-1 px-2 border border-gray-6 rounded text-xs font-medium text-slate-11 hover:bg-gray-3 transition-colors"
+                    disabled={formData?.noFeedbackFrom?.includes('slow')}
+                  >
+                    <Play className="w-3 h-3" />
+                    <span>Preview</span>
+                  </button>
                 </div>
 
-                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+                {/* Fast Object */}
+                <div className={`bg-gray-2 border border-gray-6 rounded-lg p-3 space-y-2 ${
+                  formData?.noFeedbackFrom?.includes('fast') ? 'opacity-50 grayscale' : ''
+                }`}>
                   <div className="flex items-center space-x-2">
-                    <span className="text-lg">📢</span>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-slate-12">Soft Beep</div>
-                      <div className="text-xs text-slate-10">Alert sound</div>
-                    </div>
+                    <span className="text-lg">🏃</span>
+                    <h4 className="font-medium text-slate-12 text-sm">Fast Object</h4>
                   </div>
+                  
+                  <p className="text-xs text-slate-10">Running people, speeding vehicles, animals</p>
+                  
+                  <select
+                    value={objectSounds.fast || "Chime Sound"}
+                    onChange={(e) => setObjectSounds({...objectSounds, fast: e.target.value})}
+                    className="w-full px-2 py-1 bg-white border border-gray-6 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    disabled={formData?.noFeedbackFrom?.includes('fast')}
+                  >
+                    {soundOptions.map(option => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                  
+                  <button
+                    onClick={() => playPreview(objectSounds.fast || "Chime Sound", "fast")}
+                    className="w-full flex items-center justify-center space-x-1 py-1 px-2 border border-gray-6 rounded text-xs font-medium text-slate-11 hover:bg-gray-3 transition-colors"
+                    disabled={formData?.noFeedbackFrom?.includes('fast')}
+                  >
+                    <Play className="w-3 h-3" />
+                    <span>Preview</span>
+                  </button>
                 </div>
 
-                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
+                {/* Static Object */}
+                <div className={`bg-gray-2 border border-gray-6 rounded-lg p-3 space-y-2 ${
+                  formData?.noFeedbackFrom?.includes('static') ? 'opacity-50 grayscale' : ''
+                }`}>
                   <div className="flex items-center space-x-2">
-                    <span className="text-lg">🎵</span>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-slate-12">Musical Tone</div>
-                      <div className="text-xs text-slate-10">Melodic feedback</div>
-                    </div>
+                    <span className="text-lg">🏠</span>
+                    <h4 className="font-medium text-slate-12 text-sm">Static Object</h4>
                   </div>
-                </div>
-
-                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-lg">🌿</span>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-slate-12">Nature Sound</div>
-                      <div className="text-xs text-slate-10">Organic feedback</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-lg">🎶</span>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-slate-12">Whistle</div>
-                      <div className="text-xs text-slate-10">Clear signal</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gray-2 border border-gray-6 rounded-lg p-3">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-lg">👆</span>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-slate-12">Click</div>
-                      <div className="text-xs text-slate-10">Quick feedback</div>
-                    </div>
-                  </div>
+                  
+                  <p className="text-xs text-slate-10">Walls, furniture, parked cars, trees</p>
+                  
+                  <select
+                    value={objectSounds.static || "Click Sound"}
+                    onChange={(e) => setObjectSounds({...objectSounds, static: e.target.value})}
+                    className="w-full px-2 py-1 bg-white border border-gray-6 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    disabled={formData?.noFeedbackFrom?.includes('static')}
+                  >
+                    {soundOptions.map(option => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                  
+                  <button
+                    onClick={() => playPreview(objectSounds.static || "Click Sound", "static")}
+                    className="w-full flex items-center justify-center space-x-1 py-1 px-2 border border-gray-6 rounded text-xs font-medium text-slate-11 hover:bg-gray-3 transition-colors"
+                    disabled={formData?.noFeedbackFrom?.includes('static')}
+                  >
+                    <Play className="w-3 h-3" />
+                    <span>Preview</span>
+                  </button>
                 </div>
               </div>
             </div>
