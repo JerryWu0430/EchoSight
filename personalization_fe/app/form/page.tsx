@@ -1,7 +1,9 @@
 "use client"
 import { WaitlistWrapper } from "@/components/box";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
+import { useAppContext } from "@/context";
+import { useRouter } from "next/navigation";
 
 // Static form content
 const staticFormData = {
@@ -12,15 +14,16 @@ const staticFormData = {
 type FormState = "idle" | "loading" | "success" | "error";
 type FormData = {
   audioLevel: number; // 0: low, 1: medium, 2: high
+  frequencyLevel: number; // 0: low, 1: medium, 2: high
   noFeedbackFrom: string[]; // Array of objects to ignore
   soundTracks: string[]; // Array of selected sound tracks
 };
 
 const questions = [
   {
-    id: "audioLevel",
-    title: "What audio level do you prefer?",
-    type: "slider" as const,
+    id: "audioSettings",
+    //title: "Audio Settings",
+    type: "dual-slider" as const,
     required: true,
   },
   {
@@ -28,9 +31,21 @@ const questions = [
     title: "Select what you don't want feedback from:",
     type: "checkbox-group" as const,
     options: [
-      { value: "slow", label: "Slow object" },
-      { value: "fast", label: "Fast object" },
-      { value: "static", label: "Static object" },
+      { 
+        value: "slow", 
+        label: "Slow object", 
+        examples: "Cars, bicycles, pedestrians walking slowly"
+      },
+      { 
+        value: "fast", 
+        label: "Fast object", 
+        examples: "Running people, speeding vehicles, animals"
+      },
+      { 
+        value: "static", 
+        label: "Static object", 
+        examples: "Walls, furniture, parked cars, trees"
+      },
     ],
     required: false,
   },
@@ -53,16 +68,27 @@ const questions = [
 ];
 
 const audioLevels = ["Low", "Medium", "High"];
+const frequencyLevels = ["Low", "Medium", "High"];
 
 export default function FormPage() {
+  const { hasCompletedForm, completeForm } = useAppContext();
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<FormData>({
     audioLevel: 1, // Default to medium
+    frequencyLevel: 1, // Default to medium
     noFeedbackFrom: [],
     soundTracks: [],
   });
   const [state, setState] = useState<FormState>("idle");
   const [error, setError] = useState<string>("");
+
+  // Redirect to main page if form is already completed
+  useEffect(() => {
+    if (hasCompletedForm) {
+      router.push('/');
+    }
+  }, [hasCompletedForm, router]);
 
   const currentQuestion = questions[currentStep];
   const isLastStep = currentStep === questions.length - 1;
@@ -174,28 +200,34 @@ export default function FormPage() {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      console.log("Feedback preferences submission:", {
-        ...formData,
-        audioLevelText: audioLevels[formData.audioLevel]
-      });
+      // Complete the form using context
+      completeForm(formData);
+      
       setState("success");
       
-      // Reset form after 3 seconds
+      // Redirect to main page after 2 seconds
       setTimeout(() => {
-        setState("idle");
-        setCurrentStep(0);
-        setFormData({
-          audioLevel: 1,
-          noFeedbackFrom: [],
-          soundTracks: [],
-        });
-      }, 3000);
+        router.push('/');
+      }, 2000);
       
     } catch (err) {
       setError("There was an error submitting your preferences. Please try again.");
       setState("error");
     }
   };
+
+  // Show loading if form is already completed
+  if (hasCompletedForm) {
+    return (
+      <WaitlistWrapper>
+        <div className="text-center space-y-4">
+          <div className="text-4xl">⏳</div>
+          <h1 className="text-2xl font-medium text-slate-12">Redirecting...</h1>
+          <p className="text-slate-10">You've already completed the setup form.</p>
+        </div>
+      </WaitlistWrapper>
+    );
+  }
 
   if (state === "success") {
     return (
@@ -204,6 +236,7 @@ export default function FormPage() {
           <div className="text-4xl">✅</div>
           <h1 className="text-2xl font-medium text-slate-12">Thank You!</h1>
           <p className="text-slate-10">Your preferences have been submitted successfully.</p>
+          <p className="text-slate-10 text-sm">Redirecting to main page...</p>
         </div>
       </WaitlistWrapper>
     );
@@ -211,109 +244,137 @@ export default function FormPage() {
 
   return (
     <WaitlistWrapper>
-      {/* Header */}
-      <div className="space-y-1 text-center">
-        <h1 className="text-2xl sm:text-3xl font-medium text-slate-12">
-          {staticFormData.title}
-        </h1>
-        <p className="text-slate-10 text-sm">
-          {staticFormData.subtitle}
-        </p>
-      </div>
-
-      {/* Navigation arrows and progress indicator */}
+      {/* Fixed Header Section */}
       <div className="w-full space-y-4">
-        {/* Navigation arrows */}
-        <div className="flex justify-between items-center">
-          {/* Previous arrow */}
-          <button
-            type="button"
-            onClick={handlePrevious}
-            disabled={isFirstStep || state === "loading"}
-            className="w-10 h-10 rounded-full bg-gray-11/10 hover:bg-gray-11/20 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
-          >
-            <ChevronLeft className="text-gray-11 w-5 h-5" />
-          </button>
+        {/* Header */}
+        <div className="space-y-1 text-center">
+          <h1 className="text-2xl sm:text-3xl font-medium text-slate-12">
+            {staticFormData.title}
+          </h1>
+          <p className="text-slate-10 text-sm">
+            {staticFormData.subtitle}
+          </p>
+        </div>
 
-          {/* Progress indicator */}
-          <div className="flex-1 mx-4">
-            <div className="flex justify-between text-xs text-slate-9 mb-2">
-              <span>Question {currentStep + 1} of {questions.length}</span>
-              <span>{Math.round(((currentStep + 1) / questions.length) * 100)}%</span>
+        {/* Navigation arrows and progress indicator */}
+        <div className="w-full space-y-4">
+          {/* Navigation arrows */}
+          <div className="flex justify-between items-center">
+            {/* Previous arrow */}
+            <button
+              type="button"
+              onClick={handlePrevious}
+              disabled={isFirstStep || state === "loading"}
+              className="w-10 h-10 rounded-full bg-gray-11/10 hover:bg-gray-11/20 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+            >
+              <ChevronLeft className="text-gray-11 w-5 h-5" />
+            </button>
+
+            {/* Progress indicator */}
+            <div className="flex-1 mx-4">
+              <div className="flex justify-between text-xs text-slate-9 mb-2">
+                <span>Question {currentStep + 1} of {questions.length}</span>
+              </div>
+              <div className="w-full bg-gray-6 rounded-full h-2">
+                <div 
+                  className="bg-slate-9 h-2 rounded-full transition-all duration-300 ease-out"
+                  style={{ width: `${(currentStep / (questions.length - 1)) * 100}%` }}
+                />
+              </div>
             </div>
-            <div className="w-full bg-gray-6 rounded-full h-2">
-              <div 
-                className="bg-slate-9 h-2 rounded-full transition-all duration-300 ease-out"
-                style={{ width: `${((currentStep + 1) / questions.length) * 100}%` }}
-              />
-            </div>
+
+            {/* Next arrow */}
+            <button
+              type="button"
+              onClick={handleNext}
+              disabled={state === "loading"}
+              className="w-10 h-10 rounded-full bg-gray-12 hover:bg-gray-11 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+            >
+              {state === "loading" ? (
+                <span className="text-gray-1 text-sm">...</span>
+              ) : isLastStep ? (
+                <Check className="text-gray-1 w-5 h-5" />
+              ) : (
+                <ChevronRight className="text-gray-1 w-5 h-5" />
+              )}
+            </button>
           </div>
-
-          {/* Next arrow */}
-          <button
-            type="button"
-            onClick={handleNext}
-            disabled={state === "loading"}
-            className="w-10 h-10 rounded-full bg-gray-12 hover:bg-gray-11 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
-          >
-            {state === "loading" ? (
-              <span className="text-gray-1 text-sm">...</span>
-            ) : isLastStep ? (
-              <Check className="text-gray-1 w-5 h-5" />
-            ) : (
-              <ChevronRight className="text-gray-1 w-5 h-5" />
-            )}
-          </button>
         </div>
       </div>
       
-      {/* Question */}
-      <div className="w-full space-y-6">
+      {/* Question Content - Stationary Container */}
+      <div className="w-full space-y-6 h-[500px] overflow-y-auto">
         <div className="text-center">
           <h2 className="text-lg font-medium text-slate-12 mb-6">
             {currentQuestion.title}
           </h2>
           
-          {/* Audio Level Slider */}
-          {currentQuestion.type === "slider" && (
-            <div className="space-y-4">
-              <div className="w-full max-w-2xl mx-auto">
-                <input
-                  type="range"
-                  min="0"
-                  max="2"
-                  step="1"
-                  value={formData.audioLevel}
-                  onChange={(e) => updateFormData("audioLevel", parseInt(e.target.value))}
-                  className="w-full h-2 bg-gray-6 rounded-lg appearance-none cursor-pointer slider"
-                  disabled={state === "loading"}
-                />
-                <div className="flex justify-between text-sm text-slate-10 mt-2">
-                  <span>Low</span>
-                  <span>Medium</span>
-                  <span>High</span>
+          {/* Dual Slider - Audio Level and Frequency */}
+          {currentQuestion.type === "dual-slider" && (
+            <div className="space-y-8">
+              {/* Audio Level Slider */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium text-slate-12 text-left">Audio Level</h3>
+                <div className="w-full max-w-2xl mx-auto">
+                  <input
+                    type="range"
+                    min="0"
+                    max="2"
+                    step="1"
+                    value={formData.audioLevel}
+                    onChange={(e) => updateFormData("audioLevel", parseInt(e.target.value))}
+                    className="w-full h-2 bg-gray-6 rounded-lg appearance-none cursor-pointer slider"
+                    disabled={state === "loading"}
+                  />
+                  <div className="flex justify-between text-sm text-slate-10 mt-2">
+                    <span>Low</span>
+                    <span>Medium</span>
+                    <span>High</span>
+                  </div>
                 </div>
               </div>
-              <div className="text-lg font-medium text-slate-12">
-                {audioLevels[formData.audioLevel]}
+
+              {/* Frequency Level Slider */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium text-slate-12 text-left">Frequency Level</h3>
+                <div className="w-full max-w-2xl mx-auto">
+                  <input
+                    type="range"
+                    min="0"
+                    max="2"
+                    step="1"
+                    value={formData.frequencyLevel}
+                    onChange={(e) => updateFormData("frequencyLevel", parseInt(e.target.value))}
+                    className="w-full h-2 bg-gray-6 rounded-lg appearance-none cursor-pointer slider"
+                    disabled={state === "loading"}
+                  />
+                  <div className="flex justify-between text-sm text-slate-10 mt-2">
+                    <span>Low</span>
+                    <span>Medium</span>
+                    <span>High</span>
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
           {/* Checkbox Group */}
           {currentQuestion.type === "checkbox-group" && currentQuestion.options && (
-            <div className="space-y-3 max-w-2xl mx-auto">
+            <div className="space-y-4 max-w-2xl mx-auto">
               {currentQuestion.options.map((option) => (
-                <label key={option.value} className="flex items-center justify-start text-left">
+                <label key={option.value} className="flex items-start justify-start text-left p-4 border border-gray-6 rounded-lg hover:bg-gray-2 transition-colors cursor-pointer">
                   <input
                     type="checkbox"
                     value={option.value}
                     checked={(formData[currentQuestion.id as keyof FormData] as string[]).includes(option.value)}
                     onChange={(e) => handleCheckboxChange(currentQuestion.id as keyof FormData, option.value, e.target.checked)}
-                    className="mr-3 text-slate-8 focus:ring-slate-8"
+                    className="mr-3 mt-1 text-slate-8 focus:ring-slate-8"
                     disabled={state === "loading"}
                   />
-                  <span className="text-slate-11 text-base">{option.label}</span>
+                  <div className="flex-1">
+                    <div className="text-slate-11 text-base font-medium">{option.label}</div>
+                    <div className="text-slate-10 text-sm mt-1">{option.examples}</div>
+                  </div>
                 </label>
               ))}
             </div>

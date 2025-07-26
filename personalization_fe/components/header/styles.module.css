@@ -4,13 +4,12 @@
   }
 
   nav:has(.peer\/waitlist:hover) .nav-background {
-    @apply visible left-1.5;
     visibility: visible;
-    left: theme('spacing.[1.5]');
+    left: 6px; /* 1.5 * 4px = 6px */
   }
 
   nav:has(.peer\/manifesto:hover) .nav-background {
     visibility: visible;
-    left: calc(50% + theme('spacing.[1.5]'));
+    left: calc(50% + 6px); /* 50% + 1.5 * 4px */
   }
 }
