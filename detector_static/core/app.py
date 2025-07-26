@@ -61,7 +61,7 @@ class Application:
         
         # Analyze motion
         self.motion_analyzer.estimate_camera_motion(gray)
-        frame_dominant_motion, distances = self.motion_analyzer.analyze_object_motion(tracked_objects)
+        frame_dominant_motion, distances, x_positions = self.motion_analyzer.analyze_object_motion(tracked_objects)
         
         # Update visualization
         frame_resized = self.visualizer.draw_results(frame_resized, tracked_objects)
@@ -71,8 +71,9 @@ class Application:
             current_time = time.time()
             has_objects = bool(tracked_objects)
             
-            # Always update the smooth audio system
-            play_sound_async_smooth(self.audio_engine, frame_dominant_motion, distances, has_objects)
+            # Always update the smooth audio system with x positions for stereo
+            play_sound_async_smooth(self.audio_engine, frame_dominant_motion, 
+                                 distances, has_objects, x_positions)
             
             # Update timing for compatibility
             if frame_dominant_motion != self.current_dominant_motion and has_objects:

@@ -64,10 +64,16 @@ class MotionAnalyzer:
         
         return smoothed_speed
     
-    def analyze_object_motion(self, tracked_objects: List[TrackedObject]) -> Tuple[str, List[float]]:
-        """Analyze motion of tracked objects and determine dominant motion type"""
+    def analyze_object_motion(self, tracked_objects: List[TrackedObject]) -> Tuple[str, List[float], List[float]]:
+        """
+        Analyze motion of tracked objects and determine dominant motion type.
+        
+        Returns:
+            Tuple of (frame_dominant_motion, distances, x_positions)
+        """
         frame_dominant_motion = 'none'
         distances: List[float] = []
+        x_positions: List[float] = []  # Store x-coordinates for stereo panning
         
         # Clean up old speed records
         current_ids = {obj.object_id for obj in tracked_objects}
@@ -125,6 +131,7 @@ class MotionAnalyzer:
             if pixel_size > 0:
                 distance_m = (real_size * Config.CAMERA.focal_length) / (pixel_size * 100.0)
                 distances.append(distance_m)
+                x_positions.append(compensated_x)  # Store compensated x position
             
             # Update object's motion state
             obj.motion_state = motion
@@ -134,4 +141,4 @@ class MotionAnalyzer:
         self.prev_positions = {oid: pos for oid, pos in self.prev_positions.items() 
                              if oid in current_ids}
         
-        return frame_dominant_motion, distances 
+        return frame_dominant_motion, distances, x_positions 
