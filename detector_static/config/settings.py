@@ -57,8 +57,8 @@ class Config:
     )
 
     MOTION = MotionConfig(
-        static_threshold=25,    # Increased from 15 - need more movement to exit static state
-        slow_threshold=80,      # Increased from 50 - need more movement for fast state
+        static_threshold=25,    # Need more movement to exit static state
+        slow_threshold=120,     # Significantly increased - need much more movement for fast state
         smoothing_factor=0.7,   # 70% of previous speed + 30% of new speed
         min_speed_threshold=5.0 # Minimum speed to register as movement
     )
