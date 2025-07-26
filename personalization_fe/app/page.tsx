@@ -65,8 +65,8 @@ export default function Home() {
           <div className="bg-gray-1/85 rounded-2xl p-6 shadow-[0px_170px_48px_0px_rgba(18,_18,_19,_0.00),_0px_109px_44px_0px_rgba(18,_18,_19,_0.01),_0px_61px_37px_0px_rgba(18,_18,_19,_0.05),_0px_27px_27px_0px_rgba(18,_18,_19,_0.09),_0px_7px_15px_0px_rgba(18,_18,_19,_0.10)]">
             <div className="space-y-4">
               <div className="text-center">
-                <h3 className="text-lg font-semibold text-slate-12 mb-2">Quick Stats</h3>
-                <p className="text-slate-10 text-sm">Your audio feedback summary</p>
+                <h3 className="text-lg font-semibold text-slate-12 mb-2">Audio Preferences</h3>
+                <p className="text-slate-10 text-sm">Audio feedback summary</p>
               </div>
               
               <div className="space-y-3">

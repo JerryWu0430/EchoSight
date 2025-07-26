@@ -4,7 +4,7 @@ import { ThemeSwitcher } from "../switch-theme";
 
 // Static app data
 const staticData = {
-  appName: "EarEye",
+  appName: "Stuff",
   showThemeSwitcher: true,
   copyright: "© 2024 EarEye. All rights reserved.",
 };
@@ -18,13 +18,6 @@ export function WaitlistWrapper({ children }: PropsWithChildren) {
       )}
     >
       <div className="flex flex-col items-center gap-4 flex-1 text-center w-full p-8 pb-4">
-        <div>
-          <div className="flex justify-center w-32 h-auto items-center mx-auto">
-            <div className="text-3xl font-bold text-slate-12">
-              {staticData.appName}
-            </div>
-          </div>
-        </div>
         <div className="flex flex-col gap-10">{children}</div>
       </div>
       <footer className="flex justify-between items-center w-full self-stretch px-8 py-3 text-sm bg-gray-12/[.07] overflow-hidden">
