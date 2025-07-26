@@ -13,6 +13,7 @@ class MotionAnalyzer:
         self.prev_gray = None
         self.camera_motion = np.array([0, 0], dtype=np.float32)
         self.prev_positions: Dict[int, np.ndarray] = {}
+        self.prev_speeds: Dict[int, float] = {}  # Store previous speeds for smoothing
         
     def estimate_camera_motion(self, gray: np.ndarray) -> np.ndarray:
         """Estimate camera motion between frames using ORB features"""
@@ -48,10 +49,30 @@ class MotionAnalyzer:
         self.camera_motion = camera_motion
         return camera_motion
     
+    def get_smoothed_speed(self, obj_id: int, current_speed: float) -> float:
+        """Apply exponential smoothing to speed measurements"""
+        if obj_id not in self.prev_speeds:
+            self.prev_speeds[obj_id] = current_speed
+            return current_speed
+            
+        # Apply exponential smoothing
+        smoothed_speed = (Config.MOTION.smoothing_factor * self.prev_speeds[obj_id] + 
+                         (1 - Config.MOTION.smoothing_factor) * current_speed)
+        
+        # Update stored speed
+        self.prev_speeds[obj_id] = smoothed_speed
+        
+        return smoothed_speed
+    
     def analyze_object_motion(self, tracked_objects: List[TrackedObject]) -> Tuple[str, List[float]]:
         """Analyze motion of tracked objects and determine dominant motion type"""
         frame_dominant_motion = 'none'
         distances: List[float] = []
+        
+        # Clean up old speed records
+        current_ids = {obj.object_id for obj in tracked_objects}
+        self.prev_speeds = {oid: speed for oid, speed in self.prev_speeds.items() 
+                          if oid in current_ids}
         
         for obj in tracked_objects:
             x_center, y_center = obj.center
@@ -63,17 +84,25 @@ class MotionAnalyzer:
             motion = 'static'
             
             if prev is not None:
-                speed = np.linalg.norm(compensated_center - prev)
-                if speed > Config.MOTION.slow_threshold:
-                    motion = 'fast'
-                elif speed > Config.MOTION.static_threshold:
-                    motion = 'slow'
-                else:
-                    motion = 'static'
+                # Calculate raw speed
+                raw_speed = np.linalg.norm(compensated_center - prev)
+                
+                # Apply smoothing and minimum threshold
+                speed = self.get_smoothed_speed(obj.object_id, raw_speed)
+                
+                # Only consider motion if above minimum threshold
+                if speed > Config.MOTION.min_speed_threshold:
+                    if speed > Config.MOTION.slow_threshold:
+                        motion = 'fast'
+                    elif speed > Config.MOTION.static_threshold:
+                        motion = 'slow'
+                    
+                    # Debug output for speed
+                    print(f"Object {obj.object_id} - Raw Speed: {raw_speed:.1f}, Smoothed: {speed:.1f}, State: {motion}")
             
             self.prev_positions[obj.object_id] = compensated_center
             
-            # Update dominant motion
+            # Update dominant motion with hysteresis
             if motion == 'fast':
                 frame_dominant_motion = 'fast'
             elif motion == 'slow' and frame_dominant_motion != 'fast':
@@ -102,7 +131,6 @@ class MotionAnalyzer:
             obj.distance = distance_m if pixel_size > 0 else -1.0
         
         # Clean up untracked objects
-        current_ids = {obj.object_id for obj in tracked_objects}
         self.prev_positions = {oid: pos for oid, pos in self.prev_positions.items() 
                              if oid in current_ids}
         

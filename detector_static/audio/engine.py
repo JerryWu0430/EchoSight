@@ -3,6 +3,7 @@
 import os
 import pygame
 import threading
+import math
 from collections import deque
 from threading import Lock
 from typing import Dict, List
@@ -33,7 +34,13 @@ class SmoothAudioEngine:
         # Audio parameters from config
         self.crossfade_time = Config.AUDIO.crossfade_time
         self.volume_smoothing = Config.AUDIO.volume_smoothing
-        self.max_volume = Config.AUDIO.max_volume
+        self.max_volume = 2.0  # Increased to 200% for dramatic effect
+        
+        # Distance-based volume parameters
+        self.min_distance = 0.3  # meters, closer distance for max volume
+        self.max_distance = 4.0  # meters, shorter range for min volume
+        self.min_volume_factor = 0.05  # 5% volume at max distance
+        self.distance_curve = 3.0  # Steeper falloff curve
         
         # Motion state tracking
         self.current_state = 'none'
@@ -171,7 +178,36 @@ class SmoothAudioEngine:
             return most_common
         
         return new_state
-    
+
+    def calculate_distance_volume(self, distance: float) -> float:
+        """
+        Calculate volume based on distance using an exponential falloff curve.
+        
+        Args:
+            distance: Distance to object in meters
+            
+        Returns:
+            Volume factor between 0 and 1
+        """
+        # Clamp distance between min and max
+        clamped_distance = max(self.min_distance, min(self.max_distance, distance))
+        
+        # Calculate normalized distance (0 to 1)
+        normalized_distance = (clamped_distance - self.min_distance) / (self.max_distance - self.min_distance)
+        
+        # Apply exponential falloff curve with more dramatic scaling
+        volume_factor = math.exp(-self.distance_curve * normalized_distance)
+        
+        # Scale between min and max volume with more dramatic range
+        volume_factor = self.min_volume_factor + (1 - self.min_volume_factor) * volume_factor
+        
+        # Apply additional boost for close objects
+        if distance < self.min_distance * 1.5:  # Extra boost zone
+            boost_factor = 1 + (1 - distance / (self.min_distance * 1.5))  # Up to 2x boost
+            volume_factor *= boost_factor
+            
+        return min(volume_factor, 1.0)  # Ensure we don't exceed 100% per channel
+        
     def update_from_motion_state(self, frame_dominant_motion: str, distances: List[float], has_objects: bool) -> None:
         """Update audio based on motion detection and object distances"""
         with self.lock:
@@ -184,19 +220,21 @@ class SmoothAudioEngine:
             if not has_objects:
                 return
             
-            # Calculate volume based on proximity
-            base_volume = self.max_volume
+            # Calculate base volume using closest object
+            base_volume = self.max_volume  # Now 200% max
             if distances:
                 min_distance = min(distances)
-                # Volume increases as objects get closer (capped at 5m)
-                distance_factor = max(0.2, min(1.0, 3.0 / (min_distance + 0.5)))
-                base_volume *= distance_factor
+                volume_factor = self.calculate_distance_volume(min_distance)
+                base_volume *= volume_factor
+                
+                # Debug output for volume scaling
+                print(f"Distance: {min_distance:.1f}m, Volume: {(volume_factor * 100):.1f}%")
             
-            # Set target volumes based on smoothed state
+            # Set target volumes based on smoothed state with more dramatic differences
             if smoothed_state == 'fast':
                 self.target_volumes['fast'] = base_volume
-                # Layer some slow sound for richness
-                self.target_volumes['slow'] = base_volume * 0.3
+                # Reduced layering volume for better contrast
+                self.target_volumes['slow'] = base_volume * 0.15
             elif smoothed_state == 'slow':
                 self.target_volumes['slow'] = base_volume
     

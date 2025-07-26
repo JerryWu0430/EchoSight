@@ -13,8 +13,10 @@ class ObjectDimensions:
 @dataclass
 class MotionConfig:
     """Configuration for motion detection thresholds"""
-    static_threshold: float
-    slow_threshold: float
+    static_threshold: float  # pixels per frame
+    slow_threshold: float   # pixels per frame
+    smoothing_factor: float = 0.7  # Higher value = more smoothing (0-1)
+    min_speed_threshold: float = 5.0  # Minimum speed to consider as movement
 
 @dataclass
 class CameraConfig:
@@ -55,8 +57,10 @@ class Config:
     )
 
     MOTION = MotionConfig(
-        static_threshold=15,
-        slow_threshold=50
+        static_threshold=25,    # Increased from 15 - need more movement to exit static state
+        slow_threshold=80,      # Increased from 50 - need more movement for fast state
+        smoothing_factor=0.7,   # 70% of previous speed + 30% of new speed
+        min_speed_threshold=5.0 # Minimum speed to register as movement
     )
 
     CAMERA = CameraConfig(
