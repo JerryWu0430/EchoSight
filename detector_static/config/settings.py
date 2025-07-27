@@ -75,6 +75,9 @@ class Config:
         sound_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'assets')
         return (
             sound_dir,
-            os.path.join(sound_dir, 'fast.wav'),
-            os.path.join(sound_dir, 'slow.wav')
+            #os.path.join(sound_dir, 'fast.wav'),
+            #os.path.join(sound_dir, 'slow.wav'),
+            os.path.join(sound_dir, 'cello_A2_025_forte_arco-normal.mp3'),
+            os.path.join(sound_dir, 'guitar_A3_very-long_piano_normal.mp3'),
+            
         ) 

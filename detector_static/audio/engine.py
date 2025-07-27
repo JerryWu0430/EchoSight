@@ -151,8 +151,12 @@ class SmoothAudioEngine:
     def _initialize_audio(self) -> None:
         """Initialize the audio system with sound files"""
         sound_files = {
-            'fast': 'fast.wav',
-            'slow': 'slow.wav'
+            #combination 1 beep
+            #'fast': 'fast.wav',
+            #'slow': 'slow.wav',
+            #combination 2 cello & guitar
+            'fast': 'cello_A2_025_forte_arco-normal.mp3',
+            'slow': 'guitar_A3_very-long_piano_normal.mp3'
         }
         
         try:
