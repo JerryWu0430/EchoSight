@@ -69,7 +69,7 @@ class MotionAnalyzer:
         Analyze motion of tracked objects and determine dominant motion type.
         
         Returns:
-            Tuple of (frame_dominant_motion, distances, x_positions)
+            Tuple of (closest_object_motion, distances, x_positions)
         """
         frame_dominant_motion = 'none'
         distances: List[float] = []
@@ -80,6 +80,12 @@ class MotionAnalyzer:
         self.prev_speeds = {oid: speed for oid, speed in self.prev_speeds.items() 
                           if oid in current_ids}
         
+        closest_distance = float('inf')
+        closest_motion = 'none'
+        
+        # Define stationary objects
+        stationary_objects = {'chair', 'couch', 'dining table', 'bed', 'tv', 'plant'}
+        
         for obj in tracked_objects:
             x_center, y_center = obj.center
             compensated_x = x_center - self.camera_motion[0]
@@ -87,34 +93,30 @@ class MotionAnalyzer:
             compensated_center = np.array([compensated_x, compensated_y], dtype=np.float32)
             
             prev = self.prev_positions.get(obj.object_id)
-            motion = 'static'
             
-            if prev is not None:
-                # Calculate raw speed
-                raw_speed = np.linalg.norm(compensated_center - prev)
-                
-                # Apply smoothing and minimum threshold
-                speed = self.get_smoothed_speed(obj.object_id, raw_speed)
-                
-                # Only consider motion if above minimum threshold
-                if speed > Config.MOTION.min_speed_threshold:
-                    if speed > Config.MOTION.slow_threshold:
-                        motion = 'fast'
-                    elif speed > Config.MOTION.static_threshold:
-                        motion = 'slow'
+            # Set motion state based on object type
+            if obj.class_name.lower() in stationary_objects:
+                motion = 'static'  # Always static for stationary objects
+            else:
+                motion = 'static'  # Default state
+                if prev is not None:
+                    # Calculate raw speed
+                    raw_speed = np.linalg.norm(compensated_center - prev)
                     
-                    # Debug output for speed
-                    print(f"Object {obj.object_id} - Raw Speed: {raw_speed:.1f}, Smoothed: {speed:.1f}, State: {motion}")
+                    # Apply smoothing and minimum threshold
+                    speed = self.get_smoothed_speed(obj.object_id, raw_speed)
+                    
+                    # Only consider motion if above minimum threshold
+                    if speed > Config.MOTION.min_speed_threshold:
+                        if speed > Config.MOTION.slow_threshold:
+                            motion = 'fast'
+                        elif speed > Config.MOTION.static_threshold:
+                            motion = 'slow'
+                        
+                        # Debug output for speed
+                        print(f"Object {obj.object_id} - Raw Speed: {raw_speed:.1f}, Smoothed: {speed:.1f}, State: {motion}")
             
             self.prev_positions[obj.object_id] = compensated_center
-            
-            # Update dominant motion with hysteresis
-            if motion == 'fast':
-                frame_dominant_motion = 'fast'
-            elif motion == 'slow' and frame_dominant_motion != 'fast':
-                frame_dominant_motion = 'slow'
-            elif motion == 'static' and frame_dominant_motion == 'none':
-                frame_dominant_motion = 'static'
             
             # Calculate distance
             x1, y1, x2, y2 = obj.bbox
@@ -132,6 +134,11 @@ class MotionAnalyzer:
                 distance_m = (real_size * Config.CAMERA.focal_length) / (pixel_size * 100.0)
                 distances.append(distance_m)
                 x_positions.append(compensated_x)  # Store compensated x position
+                
+                # Update closest object's motion
+                if distance_m < closest_distance:
+                    closest_distance = distance_m
+                    closest_motion = motion
             
             # Update object's motion state
             obj.motion_state = motion
@@ -141,4 +148,4 @@ class MotionAnalyzer:
         self.prev_positions = {oid: pos for oid, pos in self.prev_positions.items() 
                              if oid in current_ids}
         
-        return frame_dominant_motion, distances, x_positions 
+        return closest_motion, distances, x_positions 

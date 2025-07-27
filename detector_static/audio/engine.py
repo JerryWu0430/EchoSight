@@ -8,6 +8,7 @@ from collections import deque
 from threading import Lock
 from typing import Dict, List, Tuple
 import numpy
+import time
 
 from ..config.settings import Config
 
@@ -83,10 +84,15 @@ class SmoothAudioEngine:
         
         # Stereo panning
         self.panner = StereoPanner(Config.CAMERA.frame_width)
-        
+
         # Motion state tracking
         self.current_state = 'none'
         self.state_history: deque = deque(maxlen=5)  # Smooth state transitions
+        
+        # Static sound cooldown tracking
+        self.last_static_time = 0
+        self.static_cooldown = Config.AUDIO.static_cooldown_sec
+        self.static_volume = Config.AUDIO.static_volume
         
         # Initialize pygame mixer
         self._initialize_pygame()
@@ -151,12 +157,9 @@ class SmoothAudioEngine:
     def _initialize_audio(self) -> None:
         """Initialize the audio system with sound files"""
         sound_files = {
-            #combination 1 beep
-            #'fast': 'fast.wav',
-            #'slow': 'slow.wav',
-            #combination 2 cello & guitar
             'fast': 'cello_A2_025_forte_arco-normal.mp3',
-            'slow': 'guitar_A3_very-long_piano_normal.mp3'
+            'slow': 'guitar_A3_very-long_piano_normal.mp3',
+            'static': 'english-horn_A3_025_mezzo-forte_normal.mp3',
         }
         
         try:
@@ -311,6 +314,23 @@ class SmoothAudioEngine:
             
         return min(volume_factor, 1.0)  # Ensure we don't exceed 100% per channel
         
+    def play_static(self) -> None:
+        """Play static sound if cooldown has elapsed"""
+        current_time = time.time()
+        if current_time - self.last_static_time >= self.static_cooldown:
+            with self.lock:
+                # Set static sound volume
+                self.target_volumes['static'] = self.static_volume
+                self.last_static_time = current_time
+                
+                # Schedule static sound to stop after a short duration
+                threading.Timer(0.5, self.stop_static).start()  # Increased duration to 0.5 seconds
+
+    def stop_static(self) -> None:
+        """Stop static sound"""
+        with self.lock:
+            self.target_volumes['static'] = 0.0
+
     def update_from_motion_state(self, frame_dominant_motion: str, distances: List[float], 
                                has_objects: bool, x_positions: List[float] = None) -> None:
         """
@@ -323,39 +343,31 @@ class SmoothAudioEngine:
             x_positions: List of object x positions for stereo panning
         """
         with self.lock:
-            smoothed_state = self.smooth_state_transition(frame_dominant_motion)
-            
-            # Reset all volumes
+            # Reset all volumes except static
             for sound_name in self.target_volumes:
-                self.target_volumes[sound_name] = 0.0
+                if sound_name != 'static':  # Don't reset static volume
+                    self.target_volumes[sound_name] = 0.0
             
-            if not has_objects:
+            if not has_objects or not distances:
                 return
             
-            # Calculate base volume using closest object
-            base_volume = self.max_volume  # Now 200% max
-            if distances:
-                min_distance = min(distances)
-                volume_factor = self.calculate_distance_volume(min_distance)
-                base_volume *= volume_factor
-                
-                # Update x position for panning (use position of closest object)
-                if x_positions and len(x_positions) == len(distances):
-                    closest_idx = distances.index(min_distance)
-                    self.current_x_position = x_positions[closest_idx]
-                
-                # Debug output for volume scaling and position
-                left_scale, right_scale = self.panner.calculate_pan(self.current_x_position)
-                print(f"Distance: {min_distance:.1f}m, Volume: {(volume_factor * 100):.1f}%, "
-                      f"Position: {(self.current_x_position / Config.CAMERA.frame_width * 100):.1f}% "
-                      f"[L:{left_scale:.2f} R:{right_scale:.2f}]")
+            # Find the closest object and its index
+            min_distance = min(distances)
+            closest_idx = distances.index(min_distance)
             
-            # Set target volumes based on smoothed state
-            if smoothed_state == 'fast':
+            # Calculate volume based on distance
+            base_volume = self.max_volume
+            volume_factor = self.calculate_distance_volume(min_distance)
+            base_volume *= volume_factor
+            
+            # Update x position for panning (use position of closest object)
+            if x_positions and len(x_positions) == len(distances):
+                self.current_x_position = x_positions[closest_idx]
+            
+            # Get motion state of closest object
+            if frame_dominant_motion == 'fast':
                 self.target_volumes['fast'] = base_volume
-                # Layer some slow sound for richness
-                self.target_volumes['slow'] = base_volume * 0.15
-            elif smoothed_state == 'slow':
+            elif frame_dominant_motion == 'slow':
                 self.target_volumes['slow'] = base_volume
     
     def cleanup(self) -> None:
@@ -391,4 +403,8 @@ def play_sound_async_smooth(audio_engine: SmoothAudioEngine,
         has_objects: Whether objects are detected
         x_positions: Optional list of object x positions for stereo panning
     """
+    # Only play static sound if the closest object is static
+    if motion_state == 'static' and has_objects and distances:
+        audio_engine.play_static()
+        
     audio_engine.update_from_motion_state(motion_state, distances, has_objects, x_positions) 

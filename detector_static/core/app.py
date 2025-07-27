@@ -29,7 +29,7 @@ class Application:
             raise RuntimeError('Error: Could not open camera.')
             
         # Initialize audio
-        sound_dir, _, _ = Config.get_sound_paths()
+        sound_dir, _, _, _ = Config.get_sound_paths()
         try:
             self.audio_engine = create_smooth_audio_system(sound_dir)
             self.audio_enabled = True

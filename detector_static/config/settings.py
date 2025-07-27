@@ -36,6 +36,8 @@ class AudioConfig:
     volume_smoothing: float = 0.15
     max_volume: float = 0.7
     cooldown_sec: float = 0.5
+    static_cooldown_sec: float = 0.8  # Increased cooldown for static sound
+    static_volume: float = 0.8  # Increased volume for static sound
 
 class Config:
     """Global configuration container"""
@@ -58,7 +60,7 @@ class Config:
 
     MOTION = MotionConfig(
         static_threshold=25,    # Need more movement to exit static state
-        slow_threshold=120,     # Significantly increased - need much more movement for fast state
+        slow_threshold=60,     # Lowered threshold - easier to trigger fast state
         smoothing_factor=0.7,   # 70% of previous speed + 30% of new speed
         min_speed_threshold=5.0 # Minimum speed to register as movement
     )
@@ -70,14 +72,12 @@ class Config:
     AUDIO = AudioConfig()
 
     @classmethod
-    def get_sound_paths(cls) -> tuple[str, str, str]:
+    def get_sound_paths(cls) -> tuple[str, str, str, str]:
         """Get paths to sound files"""
         sound_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'assets')
         return (
             sound_dir,
-            #os.path.join(sound_dir, 'fast.wav'),
-            #os.path.join(sound_dir, 'slow.wav'),
             os.path.join(sound_dir, 'cello_A2_025_forte_arco-normal.mp3'),
             os.path.join(sound_dir, 'guitar_A3_very-long_piano_normal.mp3'),
-            
+            os.path.join(sound_dir, 'english-horn_A3_025_mezzo-forte_normal.mp3'),
         ) 
