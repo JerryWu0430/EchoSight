@@ -51,17 +51,29 @@ const questions = [
   },
   {
     id: "soundTracks",
-    title: "Choose your preferred sample sound tracks:",
+    title: "Choose your preferred sound alerts:",
     type: "sound-grid" as const,
     options: [
-      { value: "gentle-chime", label: "Gentle Chime", emoji: "🔔" },
-      { value: "soft-beep", label: "Soft Beep", emoji: "📢" },
-      { value: "musical-tone", label: "Musical Tone", emoji: "🎵" },
-      { value: "nature-sound", label: "Nature Sound", emoji: "🌿" },
-      { value: "whistle", label: "Whistle", emoji: "🎶" },
-      { value: "click", label: "Click", emoji: "👆" },
-      { value: "voice-alert", label: "Voice Alert", emoji: "🗣️" },
-      { value: "harmonic", label: "Harmonic", emoji: "🎼" },
+      { value: "violin/violin_A3_025_forte_arco-normal", label: "Violin", emoji: "🎻" },
+      { value: "flute/flute_A4_025_forte_normal", label: "Flute", emoji: "🎵" },
+      { value: "guitar/guitar_A3_very-long_forte_normal", label: "Guitar", emoji: "🎸" },
+      { value: "piano/piano_A3_025_forte_normal", label: "Piano", emoji: "🎹" },
+      { value: "trumpet/trumpet_A3_025_forte_normal", label: "Trumpet", emoji: "🎺" },
+      { value: "percussion/bell tree/bell-tree__025_forte_struck-singly", label: "Bell Tree", emoji: "🔔" },
+      { value: "percussion/triangle/triangle__025_forte_struck-singly", label: "Triangle", emoji: "📐" },
+      { value: "percussion/wind chimes/wind-chimes__025_forte_struck-singly", label: "Wind Chimes", emoji: "🎐" },
+      { value: "percussion/sleigh bells/sleigh-bells__025_forte_shaken", label: "Sleigh Bells", emoji: "🛎️" },
+      { value: "percussion/tambourine/tambourine__025_forte_shaken", label: "Tambourine", emoji: "🥁" },
+      { value: "cello/cello_A2_025_forte_arco-normal", label: "Cello", emoji: "🎻" },
+      { value: "clarinet/clarinet_A3_025_forte_normal", label: "Clarinet", emoji: "🎶" },
+      { value: "oboe/oboe_A4_025_forte_normal", label: "Oboe", emoji: "🎼" },
+      { value: "french horn/french-horn_A2_025_forte_normal", label: "French Horn", emoji: "📯" },
+      { value: "tuba/tuba_A1_025_forte_normal", label: "Tuba", emoji: "🎵" },
+      { value: "banjo/banjo_A3_very-long_forte_normal", label: "Banjo", emoji: "🪕" },
+      { value: "mandolin/mandolin_A3_very-long_forte_normal", label: "Mandolin", emoji: "🎸" },
+      { value: "percussion/vibraslap/vibraslap__025_forte_struck-singly", label: "Vibraslap", emoji: "🎯" },
+      { value: "percussion/woodblock/woodblock__025_forte_struck-singly", label: "Woodblock", emoji: "🪵" },
+      { value: "percussion/train whistle/train-whistle__025_forte_blown", label: "Train Whistle", emoji: "🚂" }
     ],
     required: true,
   },
@@ -125,36 +137,24 @@ export default function FormPage() {
     playAudioSample(soundValue);
   };
 
-  const playAudioSample = (soundType: string) => {
-    // Create a simple beep sound for demonstration
-    // In a real app, you'd load actual audio files
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    // Different frequencies for different sounds
-    const frequencies: { [key: string]: number } = {
-      "gentle-chime": 800,
-      "soft-beep": 440,
-      "musical-tone": 523,
-      "nature-sound": 200,
-      "whistle": 1000,
-      "click": 1200,
-      "voice-alert": 300,
-      "harmonic": 660
-    };
-    
-    oscillator.frequency.setValueAtTime(frequencies[soundType] || 440, audioContext.currentTime);
-    oscillator.type = soundType === "nature-sound" ? "sawtooth" : "sine";
-    
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-    
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.5);
+  const playAudioSample = async (soundType: string) => {
+    try {
+      // Create new Audio element
+      const audio = new Audio(`/audio/all-samples/${soundType}.mp3`);
+      
+      // Set volume to a reasonable level
+      audio.volume = 0.3;
+      
+      // Play the audio
+      await audio.play();
+      
+      // Clean up after playback
+      audio.onended = () => {
+        audio.remove();
+      };
+    } catch (error) {
+      console.error('Error playing audio sample:', error);
+    }
   };
 
   const validateCurrentStep = (): boolean => {

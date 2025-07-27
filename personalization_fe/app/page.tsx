@@ -6,14 +6,106 @@ import { useAppContext } from "@/context";
 import { useRouter } from "next/navigation";
 
 const soundOptions = [
-  "Tone Sound",
-  "Chime Sound",
-  "Click Sound",
-  "Beep Sound",
-  "Musical Sound",
-  "Nature Sound",
-  "Voice Alert",
-  "Harmonic Sound"
+  { 
+    value: "percussion/bell tree/bell-tree__025_forte_struck-singly",
+    label: "Bell Tree",
+    description: "Gentle notification sound"
+  },
+  { 
+    value: "percussion/triangle/triangle__025_forte_struck-singly",
+    label: "Triangle",
+    description: "Clear, bright ping"
+  },
+  { 
+    value: "percussion/wind chimes/wind-chimes__025_forte_struck-singly",
+    label: "Wind Chimes",
+    description: "Soft, ambient alert"
+  },
+  { 
+    value: "percussion/woodblock/woodblock__025_forte_struck-singly",
+    label: "Woodblock",
+    description: "Sharp, distinct tap"
+  },
+  { 
+    value: "percussion/sleigh bells/sleigh-bells__025_forte_shaken",
+    label: "Sleigh Bells",
+    description: "Cheerful alert sound"
+  },
+  { 
+    value: "french horn/french-horn_A2_025_forte_normal",
+    label: "French Horn",
+    description: "Bold warning sound"
+  },
+  { 
+    value: "percussion/tambourine/tambourine__025_forte_shaken",
+    label: "Tambourine",
+    description: "Rhythmic notification"
+  },
+  { 
+    value: "percussion/train whistle/train-whistle__025_forte_blown",
+    label: "Train Whistle",
+    description: "Strong attention signal"
+  },
+  { 
+    value: "violin/violin_A3_025_forte_arco-normal",
+    label: "Violin",
+    description: "Elegant alert tone"
+  },
+  { 
+    value: "flute/flute_A4_025_forte_normal",
+    label: "Flute",
+    description: "Light, airy signal"
+  },
+  { 
+    value: "clarinet/clarinet_A3_025_forte_normal",
+    label: "Clarinet",
+    description: "Smooth, warm tone"
+  },
+  { 
+    value: "cello/cello_A2_025_forte_arco-normal",
+    label: "Cello",
+    description: "Rich, deep alert"
+  },
+  { 
+    value: "percussion/vibraslap/vibraslap__025_forte_struck-singly",
+    label: "Vibraslap",
+    description: "Unique attention getter"
+  },
+  { 
+    value: "tuba/tuba_A1_025_forte_normal",
+    label: "Tuba",
+    description: "Deep, powerful alert"
+  },
+  { 
+    value: "percussion/Chinese cymbal/Chinese-cymbal__05_forte_damped",
+    label: "Chinese Cymbal",
+    description: "Dramatic notification"
+  },
+  { 
+    value: "saxophone/saxophone_A3_025_forte_normal",
+    label: "Saxophone",
+    description: "Smooth jazz tone"
+  },
+  { 
+    value: "oboe/oboe_A4_025_forte_normal",
+    label: "Oboe",
+    description: "Distinct reed tone"
+  },
+  { 
+    value: "banjo/banjo_A3_very-long_forte_normal",
+    label: "Banjo",
+    description: "Bright string alert"
+  },
+  { 
+    value: "trumpet/trumpet_A3_025_forte_normal",
+    label: "Trumpet",
+    description: "Bold brass signal"
+  },
+  { 
+    value: "percussion/cowbell/cowbell__025_mezzo-forte_damped",
+    label: "Cowbell",
+    description: "Classic alert sound"
+  }
 ];
 
 export default function Home() {
@@ -22,9 +114,9 @@ export default function Home() {
   const [volume, setVolume] = useState(75);
   const [frequency, setFrequency] = useState(50);
   const [objectSounds, setObjectSounds] = useState({
-    slow: "Tone Sound",
-    fast: "Chime Sound", 
-    static: "Click Sound"
+    slow: "percussion/bell tree/bell-tree__025_forte_struck-singly",
+    fast: "french horn/french-horn_A2_025_forte_normal",
+    static: "percussion/woodblock/woodblock__025_forte_struck-singly"
   });
 
   // Redirect to form if not completed
@@ -62,35 +154,18 @@ export default function Home() {
     }
   }, [formData, logChoices]);
 
-  const playPreview = (soundType: string, category: string) => {
-    console.log(`Playing preview for ${category}: ${soundType}`);
-    // Here you would implement actual audio playback
-
-    // Simple Web Audio API demo
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-
-    const frequencies: { [key: string]: number } = {
-      "Tone Sound": 440,
-      "Chime Sound": 800,
-      "Click Sound": 1200,
-      "Beep Sound": 500,
-      "Musical Sound": 523,
-      "Nature Sound": 200,
-      "Voice Alert": 300,
-      "Harmonic Sound": 660
-    };
-
-    oscillator.frequency.setValueAtTime(frequencies[soundType] || 440, audioContext.currentTime);
-    gainNode.gain.setValueAtTime(volume / 100 * 0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.5);
+  const playPreview = async (soundValue: string) => {
+    try {
+      const audio = new Audio(`/audio/all-samples/${soundValue}.mp3`);
+      audio.volume = volume / 100 * 0.3;
+      await audio.play();
+      
+      audio.onended = () => {
+        audio.remove();
+      };
+    } catch (error) {
+      console.error('Error playing audio sample:', error);
+    }
   };
 
   const handleResetForm = () => {
@@ -244,7 +319,7 @@ export default function Home() {
 
         {/* Main Content */}
         <div className="flex-1">
-          <WaitlistWrapper>
+          <WaitlistWrapper minHeight="auto">
             <div className="w-full space-y-6">
               {/* Header */}
               <div className="text-center space-y-2">
@@ -257,62 +332,156 @@ export default function Home() {
               </div>
 
               {/* Sound Library Section */}
-              <div className="space-y-4">
+              <div className="space-y-8">
+                {/* Fixed Header */}
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-12 mb-2">Sound Library</h2>
-                  <p className="text-slate-10 text-sm">
-                    Available audio feedback options for your device.
-                  </p>
+                  <h2 className="text-2xl font-medium text-slate-12 text-center">Sound Library</h2>
+                  <p className="text-slate-11 text-center mt-2">Available audio feedback options for your device.</p>
                 </div>
 
-                {/* Sound Library Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center">
-                    <div className="text-3xl mb-2">🔔</div>
-                    <div className="text-sm font-medium text-slate-12">Gentle Chime</div>
-                    <div className="text-xs text-slate-10 mt-1">Soft notification</div>
-                  </div>
-                  
-                  <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center">
-                    <div className="text-3xl mb-2">📢</div>
-                    <div className="text-sm font-medium text-slate-12">Soft Beep</div>
-                    <div className="text-xs text-slate-10 mt-1">Alert sound</div>
-                  </div>
-                  
-                  <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center">
-                    <div className="text-3xl mb-2">🎵</div>
-                    <div className="text-sm font-medium text-slate-12">Musical Tone</div>
-                    <div className="text-xs text-slate-10 mt-1">Melodic feedback</div>
-                  </div>
-                  
-                  <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center">
-                    <div className="text-3xl mb-2">🌿</div>
-                    <div className="text-sm font-medium text-slate-12">Nature Sound</div>
-                    <div className="text-xs text-slate-10 mt-1">Organic feedback</div>
-                  </div>
-                  
-                  <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center">
-                    <div className="text-3xl mb-2">🎶</div>
-                    <div className="text-sm font-medium text-slate-12">Whistle</div>
-                    <div className="text-xs text-slate-10 mt-1">Clear signal</div>
-                  </div>
-                  
-                  <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center">
-                    <div className="text-3xl mb-2">👆</div>
-                    <div className="text-sm font-medium text-slate-12">Click</div>
-                    <div className="text-xs text-slate-10 mt-1">Quick feedback</div>
-                  </div>
-                  
-                  <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center">
-                    <div className="text-3xl mb-2">🗣️</div>
-                    <div className="text-sm font-medium text-slate-12">Voice Alert</div>
-                    <div className="text-xs text-slate-10 mt-1">Spoken feedback</div>
-                  </div>
-                  
-                  <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center">
-                    <div className="text-3xl mb-2">🎼</div>
-                    <div className="text-sm font-medium text-slate-12">Harmonic</div>
-                    <div className="text-xs text-slate-10 mt-1">Musical harmony</div>
+                {/* Scrollable Sound Grid Container */}
+                <div className="relative h-[380px] overflow-y-auto pr-2 rounded-lg custom-scrollbar">
+                  {/* Sound Library Grid */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pb-4">
+                    <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-3 transition-colors" 
+                         onClick={() => new Audio('/audio/all-samples/percussion/bell tree/bell-tree__025_forte_struck-singly.mp3').play()}>
+                      <div className="text-3xl mb-2">🔔</div>
+                      <div className="text-sm font-medium text-slate-12">Bell Tree</div>
+                      <div className="text-xs text-slate-10 mt-1">Soft notification</div>
+                    </div>
+                    
+                    <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-3 transition-colors"
+                         onClick={() => new Audio('/audio/all-samples/french horn/french-horn_A2_025_forte_normal.mp3').play()}>
+                      <div className="text-3xl mb-2">📯</div>
+                      <div className="text-sm font-medium text-slate-12">French Horn</div>
+                      <div className="text-xs text-slate-10 mt-1">Alert sound</div>
+                    </div>
+                    
+                    <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-3 transition-colors"
+                         onClick={() => new Audio('/audio/all-samples/violin/violin_A3_025_forte_arco-normal.mp3').play()}>
+                      <div className="text-3xl mb-2">🎻</div>
+                      <div className="text-sm font-medium text-slate-12">Violin</div>
+                      <div className="text-xs text-slate-10 mt-1">Melodic feedback</div>
+                    </div>
+                    
+                    <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-3 transition-colors"
+                         onClick={() => new Audio('/audio/all-samples/flute/flute_A4_025_forte_normal.mp3').play()}>
+                      <div className="text-3xl mb-2">🎵</div>
+                      <div className="text-sm font-medium text-slate-12">Flute</div>
+                      <div className="text-xs text-slate-10 mt-1">Organic feedback</div>
+                    </div>
+                    
+                    <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-3 transition-colors"
+                         onClick={() => new Audio('/audio/all-samples/percussion/train whistle/train-whistle__025_forte_blown.mp3').play()}>
+                      <div className="text-3xl mb-2">🚂</div>
+                      <div className="text-sm font-medium text-slate-12">Train Whistle</div>
+                      <div className="text-xs text-slate-10 mt-1">Clear signal</div>
+                    </div>
+                    
+                    <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-3 transition-colors"
+                         onClick={() => new Audio('/audio/all-samples/percussion/woodblock/woodblock__025_forte_struck-singly.mp3').play()}>
+                      <div className="text-3xl mb-2">🪵</div>
+                      <div className="text-sm font-medium text-slate-12">Woodblock</div>
+                      <div className="text-xs text-slate-10 mt-1">Quick feedback</div>
+                    </div>
+                    
+                    <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-3 transition-colors"
+                         onClick={() => new Audio('/audio/all-samples/clarinet/clarinet_A3_025_forte_normal.mp3').play()}>
+                      <div className="text-3xl mb-2">🎶</div>
+                      <div className="text-sm font-medium text-slate-12">Clarinet</div>
+                      <div className="text-xs text-slate-10 mt-1">Smooth tone</div>
+                    </div>
+                    
+                    <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-3 transition-colors"
+                         onClick={() => new Audio('/audio/all-samples/cello/cello_A2_025_forte_arco-normal.mp3').play()}>
+                      <div className="text-3xl mb-2">🎻</div>
+                      <div className="text-sm font-medium text-slate-12">Cello</div>
+                      <div className="text-xs text-slate-10 mt-1">Musical harmony</div>
+                    </div>
+
+                    <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-3 transition-colors"
+                         onClick={() => new Audio('/audio/all-samples/percussion/wind chimes/wind-chimes__025_forte_struck-singly.mp3').play()}>
+                      <div className="text-3xl mb-2">🎐</div>
+                      <div className="text-sm font-medium text-slate-12">Wind Chimes</div>
+                      <div className="text-xs text-slate-10 mt-1">Gentle alert</div>
+                    </div>
+
+                    <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-3 transition-colors"
+                         onClick={() => new Audio('/audio/all-samples/percussion/triangle/triangle__025_forte_struck-singly.mp3').play()}>
+                      <div className="text-3xl mb-2">📐</div>
+                      <div className="text-sm font-medium text-slate-12">Triangle</div>
+                      <div className="text-xs text-slate-10 mt-1">Bright ping</div>
+                    </div>
+
+                    <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-3 transition-colors"
+                         onClick={() => new Audio('/audio/all-samples/banjo/banjo_A3_very-long_forte_normal.mp3').play()}>
+                      <div className="text-3xl mb-2">🪕</div>
+                      <div className="text-sm font-medium text-slate-12">Banjo</div>
+                      <div className="text-xs text-slate-10 mt-1">Folk tone</div>
+                    </div>
+
+                    <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-3 transition-colors"
+                         onClick={() => new Audio('/audio/all-samples/trumpet/trumpet_A3_025_forte_normal.mp3').play()}>
+                      <div className="text-3xl mb-2">🎺</div>
+                      <div className="text-sm font-medium text-slate-12">Trumpet</div>
+                      <div className="text-xs text-slate-10 mt-1">Bold alert</div>
+                    </div>
+
+                    <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-3 transition-colors"
+                         onClick={() => new Audio('/audio/all-samples/percussion/sleigh bells/sleigh-bells__025_forte_shaken.mp3').play()}>
+                      <div className="text-3xl mb-2">🛎️</div>
+                      <div className="text-sm font-medium text-slate-12">Sleigh Bells</div>
+                      <div className="text-xs text-slate-10 mt-1">Cheerful alert</div>
+                    </div>
+
+                    <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-3 transition-colors"
+                         onClick={() => new Audio('/audio/all-samples/oboe/oboe_A4_025_forte_normal.mp3').play()}>
+                      <div className="text-3xl mb-2">🎼</div>
+                      <div className="text-sm font-medium text-slate-12">Oboe</div>
+                      <div className="text-xs text-slate-10 mt-1">Distinct tone</div>
+                    </div>
+
+                    <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-3 transition-colors"
+                         onClick={() => new Audio('/audio/all-samples/percussion/tambourine/tambourine__025_forte_shaken.mp3').play()}>
+                      <div className="text-3xl mb-2">🥁</div>
+                      <div className="text-sm font-medium text-slate-12">Tambourine</div>
+                      <div className="text-xs text-slate-10 mt-1">Rhythmic alert</div>
+                    </div>
+
+                    <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-3 transition-colors"
+                         onClick={() => new Audio('/audio/all-samples/mandolin/mandolin_A3_very-long_forte_normal.mp3').play()}>
+                      <div className="text-3xl mb-2">🎸</div>
+                      <div className="text-sm font-medium text-slate-12">Mandolin</div>
+                      <div className="text-xs text-slate-10 mt-1">String tone</div>
+                    </div>
+
+                    <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-3 transition-colors"
+                         onClick={() => new Audio('/audio/all-samples/percussion/vibraslap/vibraslap__025_forte_struck-singly.mp3').play()}>
+                      <div className="text-3xl mb-2">🎯</div>
+                      <div className="text-sm font-medium text-slate-12">Vibraslap</div>
+                      <div className="text-xs text-slate-10 mt-1">Unique alert</div>
+                    </div>
+
+                    <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-3 transition-colors"
+                         onClick={() => new Audio('/audio/all-samples/tuba/tuba_A1_025_forte_normal.mp3').play()}>
+                      <div className="text-3xl mb-2">📢</div>
+                      <div className="text-sm font-medium text-slate-12">Tuba</div>
+                      <div className="text-xs text-slate-10 mt-1">Deep tone</div>
+                    </div>
+
+                    <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-3 transition-colors"
+                         onClick={() => new Audio('/audio/all-samples/percussion/Chinese cymbal/Chinese-cymbal__05_forte_damped.mp3').play()}>
+                      <div className="text-3xl mb-2">🎪</div>
+                      <div className="text-sm font-medium text-slate-12">Chinese Cymbal</div>
+                      <div className="text-xs text-slate-10 mt-1">Dramatic alert</div>
+                    </div>
+
+                    <div className="bg-gray-2 border border-gray-6 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-3 transition-colors"
+                         onClick={() => new Audio('/audio/all-samples/saxophone/saxophone_A3_025_forte_normal.mp3').play()}>
+                      <div className="text-3xl mb-2">🎷</div>
+                      <div className="text-sm font-medium text-slate-12">Saxophone</div>
+                      <div className="text-xs text-slate-10 mt-1">Jazz tone</div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -334,15 +503,15 @@ export default function Home() {
         </div>
 
         {/* Right Side Container */}
-        <div className="w-64 flex-shrink-0">
+        <div className="w-64 h-[500px] flex-shrink-0">
           <div className="bg-gray-1/85 rounded-2xl p-6 shadow-[0px_170px_48px_0px_rgba(18,_18,_19,_0.00),_0px_109px_44px_0px_rgba(18,_18,_19,_0.01),_0px_61px_37px_0px_rgba(18,_18,_19,_0.05),_0px_27px_27px_0px_rgba(18,_18,_19,_0.09),_0px_7px_15px_0px_rgba(18,_18,_19,_0.10)]">
             <div className="space-y-6">
               <div className="text-center">
-                <h3 className="text-lg font-semibold text-slate-12 mb-2">Object Categories</h3>
-                <p className="text-slate-10 text-sm">Configure audio feedback for different object types</p>
+                <h3 className="text-base font-semibold text-slate-12 mb-1">Object Categories</h3>
+                <p className="text-slate-10 text-xs">Configure audio feedback for different object types</p>
               </div>
               
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {/* Slow Object */}
                 <div className={`bg-gray-2 border border-gray-6 rounded-lg p-3 space-y-2 ${
                   formData?.noFeedbackFrom?.includes('slow') ? 'opacity-50 grayscale' : ''
@@ -352,25 +521,32 @@ export default function Home() {
                     <h4 className="font-medium text-slate-12 text-sm">Slow Object</h4>
                   </div>
                   
-                  <p className="text-xs text-slate-10">Cars, bicycles, pedestrians walking slowly</p>
+                  <p className="text-sm text-slate-10">Cars, bicycles, pedestrians walking slowly</p>
                   
-                  <select
-                    value={objectSounds.slow || "Tone Sound"}
-                    onChange={(e) => setObjectSounds({...objectSounds, slow: e.target.value})}
-                    className="w-full px-2 py-1 bg-white border border-gray-6 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    disabled={formData?.noFeedbackFrom?.includes('slow')}
-                  >
-                    {soundOptions.map(option => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={objectSounds.slow}
+                      onChange={(e) => setObjectSounds({...objectSounds, slow: e.target.value})}
+                      className="w-full px-2 py-1.5 bg-gray-1 border border-gray-6 rounded text-sm text-slate-12 appearance-none focus:outline-none focus:ring-2 focus:ring-slate-8"
+                      disabled={formData?.noFeedbackFrom?.includes('slow')}
+                    >
+                      {soundOptions.map(option => (
+                        <option key={option.value} value={option.value}>{option.label} - {option.description}</option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                      <svg className="w-4 h-4 text-slate-11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
                   
                   <button
-                    onClick={() => playPreview(objectSounds.slow || "Tone Sound", "slow")}
-                    className="w-full flex items-center justify-center space-x-1 py-1 px-2 border border-gray-6 rounded text-xs font-medium text-slate-11 hover:bg-gray-3 transition-colors"
+                    onClick={() => playPreview(objectSounds.slow)}
+                    className="w-full flex items-center justify-center space-x-1 py-1.5 px-3 bg-gray-3 hover:bg-gray-4 rounded text-sm font-medium text-slate-12 transition-colors"
                     disabled={formData?.noFeedbackFrom?.includes('slow')}
                   >
-                    <Play className="w-3 h-3" />
+                    <Play className="w-4 h-4" />
                     <span>Preview</span>
                   </button>
                 </div>
@@ -384,25 +560,32 @@ export default function Home() {
                     <h4 className="font-medium text-slate-12 text-sm">Fast Object</h4>
                   </div>
                   
-                  <p className="text-xs text-slate-10">Running people, speeding vehicles, animals</p>
+                  <p className="text-sm text-slate-10">Running people, speeding vehicles, animals</p>
                   
-                  <select
-                    value={objectSounds.fast || "Chime Sound"}
-                    onChange={(e) => setObjectSounds({...objectSounds, fast: e.target.value})}
-                    className="w-full px-2 py-1 bg-white border border-gray-6 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    disabled={formData?.noFeedbackFrom?.includes('fast')}
-                  >
-                    {soundOptions.map(option => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={objectSounds.fast}
+                      onChange={(e) => setObjectSounds({...objectSounds, fast: e.target.value})}
+                      className="w-full px-2 py-1.5 bg-gray-1 border border-gray-6 rounded text-sm text-slate-12 appearance-none focus:outline-none focus:ring-2 focus:ring-slate-8"
+                      disabled={formData?.noFeedbackFrom?.includes('fast')}
+                    >
+                      {soundOptions.map(option => (
+                        <option key={option.value} value={option.value}>{option.label} - {option.description}</option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                      <svg className="w-4 h-4 text-slate-11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
                   
                   <button
-                    onClick={() => playPreview(objectSounds.fast || "Chime Sound", "fast")}
-                    className="w-full flex items-center justify-center space-x-1 py-1 px-2 border border-gray-6 rounded text-xs font-medium text-slate-11 hover:bg-gray-3 transition-colors"
+                    onClick={() => playPreview(objectSounds.fast)}
+                    className="w-full flex items-center justify-center space-x-1 py-1.5 px-3 bg-gray-3 hover:bg-gray-4 rounded text-sm font-medium text-slate-12 transition-colors"
                     disabled={formData?.noFeedbackFrom?.includes('fast')}
                   >
-                    <Play className="w-3 h-3" />
+                    <Play className="w-4 h-4" />
                     <span>Preview</span>
                   </button>
                 </div>
@@ -416,25 +599,32 @@ export default function Home() {
                     <h4 className="font-medium text-slate-12 text-sm">Static Object</h4>
                   </div>
                   
-                  <p className="text-xs text-slate-10">Walls, furniture, parked cars, trees</p>
+                  <p className="text-sm text-slate-10">Walls, furniture, parked cars, trees</p>
                   
-                  <select
-                    value={objectSounds.static || "Click Sound"}
-                    onChange={(e) => setObjectSounds({...objectSounds, static: e.target.value})}
-                    className="w-full px-2 py-1 bg-white border border-gray-6 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    disabled={formData?.noFeedbackFrom?.includes('static')}
-                  >
-                    {soundOptions.map(option => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={objectSounds.static}
+                      onChange={(e) => setObjectSounds({...objectSounds, static: e.target.value})}
+                      className="w-full px-2 py-1.5 bg-gray-1 border border-gray-6 rounded text-sm text-slate-12 appearance-none focus:outline-none focus:ring-2 focus:ring-slate-8"
+                      disabled={formData?.noFeedbackFrom?.includes('static')}
+                    >
+                      {soundOptions.map(option => (
+                        <option key={option.value} value={option.value}>{option.label} - {option.description}</option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                      <svg className="w-4 h-4 text-slate-11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
                   
                   <button
-                    onClick={() => playPreview(objectSounds.static || "Click Sound", "static")}
-                    className="w-full flex items-center justify-center space-x-1 py-1 px-2 border border-gray-6 rounded text-xs font-medium text-slate-11 hover:bg-gray-3 transition-colors"
+                    onClick={() => playPreview(objectSounds.static)}
+                    className="w-full flex items-center justify-center space-x-1 py-1.5 px-3 bg-gray-3 hover:bg-gray-4 rounded text-sm font-medium text-slate-12 transition-colors"
                     disabled={formData?.noFeedbackFrom?.includes('static')}
                   >
-                    <Play className="w-3 h-3" />
+                    <Play className="w-4 h-4" />
                     <span>Preview</span>
                   </button>
                 </div>
@@ -469,6 +659,22 @@ export default function Home() {
         }
         .slider::-moz-range-track {
           background: transparent;
+        }
+      `}</style>
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.1);
+          border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(0, 0, 0, 0.3);
         }
       `}</style>
     </div>
