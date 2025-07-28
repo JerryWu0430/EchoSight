@@ -1,4 +1,6 @@
 # EchoSight
+Project that on [SoTa's Human Augmentation Hackathin](https://lu.ma/1au1lxbt?tk=N9hNV7) 2nd place!
+
 
 EchoSight is an innovative computer vision project that translates visual information into spatial audio feedback, designed to assist users in understanding their environment through sound. The system detects objects, tracks their movement, and generates real-time audio cues based on object position, distance, and motion states.
 
